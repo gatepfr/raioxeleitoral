@@ -1,0 +1,65 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Candidate {
+  id                  String            @id @default(uuid())
+  sq_candidato        String            @unique
+  nome_completo       String
+  nome_urna           String
+  cpf                 String
+  email_tse           String?
+  partido             String
+  cargo               String
+  uf                  String
+  municipio           String
+  situacao_candidatura String
+  assets              CandidateAsset[]
+  socials             CandidateSocial[]
+  lead                Lead?
+  updatedAt           DateTime          @updatedAt
+}
+
+model CandidateAsset {
+  id           String    @id @default(uuid())
+  candidate_id String
+  candidate    Candidate @relation(fields: [candidate_id], references: [id])
+  tipo_bem     String
+  descricao    String
+  valor        Float
+}
+
+model CandidateSocial {
+  id           String    @id @default(uuid())
+  candidate_id String
+  candidate    Candidate @relation(fields: [candidate_id], references: [id])
+  tipo_rede    String
+  url          String
+}
+
+model Lead {
+  id                   String           @id @default(uuid())
+  candidate_id         String           @unique
+  candidate            Candidate        @relation(fields: [candidate_id], references: [id])
+  status               String           @default("PROSPECT") // PROSPECT, CONTATADO, REUNIAO, PROPOSTA, FECHADO, PERDIDO
+  vendedor_responsavel String?
+  valor_contrato       Float?
+  data_proxima_acao    DateTime?
+  interactions         Interaction[]
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+}
+
+model Interaction {
+  id            String   @id @default(uuid())
+  lead_id       String
+  lead          Lead     @relation(fields: [lead_id], references: [id])
+  anotacao      String
+  tipo_contato  String   // WHATSAPP, CALL, MEETING
+  data_registro DateTime @default(now())
+}
