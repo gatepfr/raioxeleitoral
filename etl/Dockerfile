@@ -1,6 +1,6 @@
 FROM python:3.11-slim
-
 WORKDIR /app
-
-# Placeholder for ETL logic
-CMD ["python", "--version"]
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["python", "sync_tse.py"]
