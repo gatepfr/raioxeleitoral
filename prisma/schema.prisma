@@ -21,7 +21,6 @@ model Candidate {
   situacao_candidatura String
   assets              CandidateAsset[]
   socials             CandidateSocial[]
-  lead                Lead?
   updatedAt           DateTime          @updatedAt
 }
 
@@ -42,17 +41,35 @@ model CandidateSocial {
   url          String
 }
 
+model MyCandidate {
+  id               String      @id @default(uuid())
+  nome             String
+  cpf              String?
+  email            String?
+  telefone         String
+  uf               String
+  municipio        String
+  cargo            String
+  origem_indicacao String?
+  rede_social      String?
+  tipo_origem      String      @default("MANUAL") // TSE, MANUAL
+  tse_id           String?     // Link to Candidate.sq_candidato if from TSE
+  lead             Lead?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
 model Lead {
-  id                   String           @id @default(uuid())
-  candidate_id         String           @unique
-  candidate            Candidate        @relation(fields: [candidate_id], references: [id])
-  status               String           @default("PROSPECT") // PROSPECT, CONTATADO, REUNIAO, PROPOSTA, FECHADO, PERDIDO
+  id                   String       @id @default(uuid())
+  my_candidate_id      String       @unique
+  my_candidate         MyCandidate  @relation(fields: [my_candidate_id], references: [id])
+  status               String       @default("PROSPECT") // PROSPECT, CONTATADO, REUNIAO, PROPOSTA, FECHADO, PERDIDO
   vendedor_responsavel String?
   valor_contrato       Float?
   data_proxima_acao    DateTime?
   interactions         Interaction[]
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 }
 
 model Interaction {
