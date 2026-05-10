@@ -10,9 +10,10 @@ import { formatCurrency } from '@/lib/utils';
 interface KanbanCardProps {
   lead: Lead;
   isOverlay?: boolean;
+  onClick?: (lead: Lead) => void;
 }
 
-export const KanbanCard = React.memo(function KanbanCard({ lead, isOverlay }: KanbanCardProps) {
+export const KanbanCard = React.memo(function KanbanCard({ lead, isOverlay, onClick }: KanbanCardProps) {
   const {
     attributes,
     listeners,
@@ -52,6 +53,7 @@ export const KanbanCard = React.memo(function KanbanCard({ lead, isOverlay }: Ka
       style={style}
       {...attributes}
       {...listeners}
+      onClick={() => onClick?.(lead)}
       className={`cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors ${
         isOverlay ? 'shadow-xl border-primary ring-2 ring-primary/20' : ''
       }`}
@@ -74,4 +76,4 @@ export const KanbanCard = React.memo(function KanbanCard({ lead, isOverlay }: Ka
       </CardContent>
     </Card>
   );
-}
+});
