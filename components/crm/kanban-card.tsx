@@ -9,9 +9,10 @@ import { formatCurrency } from '@/lib/utils';
 
 interface KanbanCardProps {
   lead: Lead;
+  isOverlay?: boolean;
 }
 
-export function KanbanCard({ lead }: KanbanCardProps) {
+export const KanbanCard = React.memo(function KanbanCard({ lead, isOverlay }: KanbanCardProps) {
   const {
     attributes,
     listeners,
@@ -25,6 +26,7 @@ export function KanbanCard({ lead }: KanbanCardProps) {
       type: 'Lead',
       lead,
     },
+    disabled: isOverlay,
   });
 
   const style = {
@@ -34,7 +36,7 @@ export function KanbanCard({ lead }: KanbanCardProps) {
 
   const totalAssets = lead.candidate.assets.reduce((sum, asset) => sum + asset.valor, 0);
 
-  if (isDragging) {
+  if (isDragging && !isOverlay) {
     return (
       <div
         ref={setNodeRef}
@@ -50,7 +52,9 @@ export function KanbanCard({ lead }: KanbanCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
+      className={`cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors ${
+        isOverlay ? 'shadow-xl border-primary ring-2 ring-primary/20' : ''
+      }`}
     >
       <CardHeader className="p-3 pb-0">
         <CardTitle className="text-sm font-bold truncate">

@@ -75,8 +75,8 @@ export function KanbanBoard() {
       </div>
       <DragOverlay>
         {activeLead ? (
-          <div className="w-80 opacity-80">
-            <KanbanCard lead={activeLead} />
+          <div className="w-80 opacity-90">
+            <KanbanCard lead={activeLead} isOverlay={true} />
           </div>
         ) : null}
       </DragOverlay>
