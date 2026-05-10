@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 export default function Home() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [filters, setFilters] = useState({ uf: "", municipio: "" });
@@ -17,18 +18,20 @@ export default function Home() {
   useEffect(() => {
     const fetchCandidates = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const params = new URLSearchParams();
         if (filters.uf) params.append("uf", filters.uf);
         if (filters.municipio) params.append("municipio", filters.municipio);
 
         const response = await fetch(`/api/candidates?${params.toString()}`);
-        if (!response.ok) throw new Error("Failed to fetch candidates");
+        if (!response.ok) throw new Error("Falha ao carregar candidatos. Por favor, tente novamente.");
         
         const data = await response.json();
         setCandidates(data);
       } catch (error) {
         console.error("Error fetching candidates:", error);
+        setError(error instanceof Error ? error.message : "Ocorreu um erro inesperado.");
       } finally {
         setIsLoading(false);
       }
@@ -59,6 +62,13 @@ export default function Home() {
         </div>
 
         <FilterBar onSearch={handleSearch} />
+
+        {error && (
+          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl flex items-center gap-3">
+            <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+            <p className="font-medium">{error}</p>
+          </div>
+        )}
 
         <div className="bg-white dark:bg-zinc-900 rounded-xl border shadow-sm overflow-hidden">
           {isLoading ? (
