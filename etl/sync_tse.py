@@ -78,7 +78,7 @@ def transform_and_load(extract_dir):
         'SG_PARTIDO': 'partido',
         'DS_CARGO': 'cargo',
         'SG_UF': 'uf',
-        'NM_MUNICIPIO': 'municipio',
+        'NM_UE': 'municipio',
         'DS_SITUACAO_CANDIDATURA': 'situacao_candidatura'
     }
 
@@ -99,50 +99,22 @@ def transform_and_load(extract_dir):
             df_filtered = df[cols_to_use].copy()
             df_filtered.rename(columns=mapping, inplace=True)
             
+            # Fallback for missing municipality
+            if 'municipio' not in df_filtered.columns or df_filtered['municipio'].isnull().any():
+                df_filtered['municipio'] = df_filtered.get('municipio', 'Não informado').fillna('Não informado')
+
             # Data cleaning
             df_filtered['sq_candidato'] = df_filtered['sq_candidato'].astype(str)
             df_filtered['cpf'] = df_filtered['cpf'].astype(str)
+            df_filtered['updatedAt'] = pd.Timestamp.now()
             
             # Generate UUIDs for new records
             df_filtered['id'] = [str(uuid.uuid4()) for _ in range(len(df_filtered))]
             
             logger.info(f"Loading {len(df_filtered)} records into database...")
             
-            # Load to temporary table
-            df_filtered.to_sql('temp_candidates', engine, if_exists='replace', index=False)
-            
-            with engine.begin() as conn:
-                # Upsert query (PostgreSQL specific)
-                upsert_query = text("""
-                INSERT INTO "Candidate" (id, sq_candidato, nome_completo, nome_urna, cpf, email_tse, partido, cargo, uf, municipio, situacao_candidatura, "updatedAt")
-                SELECT 
-                    id, 
-                    sq_candidato, 
-                    nome_completo, 
-                    nome_urna, 
-                    cpf, 
-                    email_tse, 
-                    partido, 
-                    cargo, 
-                    uf, 
-                    municipio, 
-                    situacao_candidatura,
-                    NOW()
-                FROM temp_candidates
-                ON CONFLICT (sq_candidato) DO UPDATE SET
-                    nome_completo = EXCLUDED.nome_completo,
-                    nome_urna = EXCLUDED.nome_urna,
-                    cpf = EXCLUDED.cpf,
-                    email_tse = EXCLUDED.email_tse,
-                    partido = EXCLUDED.partido,
-                    cargo = EXCLUDED.cargo,
-                    uf = EXCLUDED.uf,
-                    municipio = EXCLUDED.municipio,
-                    situacao_candidatura = EXCLUDED.situacao_candidatura,
-                    "updatedAt" = NOW();
-                """)
-                conn.execute(upsert_query)
-                conn.execute(text("DROP TABLE temp_candidates"))
+            # Simple append for initial load
+            df_filtered.to_sql('Candidate', engine, if_exists='append', index=False)
                 
             logger.info(f"Successfully processed {csv_path.name}")
             

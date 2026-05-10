@@ -26,3 +26,17 @@ export interface Candidate {
   assets: Asset[];
   socials: Social[];
 }
+
+export type LeadStatus = 'PROSPECT' | 'CONTATADO' | 'REUNIAO' | 'PROPOSTA' | 'FECHADO' | 'PERDIDO';
+
+export interface Lead {
+  id: string;
+  candidate_id: string;
+  candidate: Candidate;
+  status: LeadStatus;
+  vendedor_responsavel: string | null;
+  valor_contrato: number | null;
+  data_proxima_acao: string | Date | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}

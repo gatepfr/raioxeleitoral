@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -8,9 +8,14 @@ import {
   useSensor,
   useSensors,
   closestCorners,
+  DragStartEvent,
+  DragOverlay,
 } from '@dnd-kit/core';
+import { Lead, LeadStatus } from '@/types';
+import { KanbanColumn } from './kanban-column';
+import { KanbanCard } from './kanban-card';
 
-const COLUMNS = [
+const COLUMNS: { id: LeadStatus; title: string }[] = [
   { id: 'PROSPECT', title: 'Prospect' },
   { id: 'CONTATADO', title: 'Contatado' },
   { id: 'REUNIAO', title: 'Reunião' },
@@ -20,6 +25,9 @@ const COLUMNS = [
 ];
 
 export function KanbanBoard() {
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [activeLead, setActiveLead] = useState<Lead | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -28,38 +36,50 @@ export function KanbanBoard() {
     })
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    if (event.active.data.current?.type === 'Lead') {
+      setActiveLead(event.active.data.current.lead);
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveLead(null);
     const { active, over } = event;
     if (!over) return;
 
-    console.log('Drag ended:', { activeId: active.id, overId: over.id });
-    // TODO: Implement lead movement logic
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    console.log('Drag ended:', { activeId, overId });
+    // TODO: Implement lead movement logic in Task 4
   };
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
       <div className="flex gap-4 p-4 overflow-x-auto min-h-[calc(100vh-200px)]">
         {COLUMNS.map((column) => (
-          <div
+          <KanbanColumn
             key={column.id}
-            className="flex flex-col w-80 bg-slate-100 rounded-lg p-4 shrink-0"
-          >
-            <h3 className="font-semibold mb-4 text-slate-700 uppercase text-sm tracking-wider">
-              {column.title}
-            </h3>
-            <div className="flex-1 space-y-3">
-              {/* Leads will be rendered here */}
-              <div className="text-xs text-slate-400 text-center py-8 border-2 border-dashed border-slate-200 rounded-md">
-                Nenhum lead
-              </div>
-            </div>
-          </div>
+            id={column.id}
+            title={column.title}
+            leads={leads.filter((lead) => lead.status === column.id)}
+          />
         ))}
       </div>
+      <DragOverlay>
+        {activeLead ? (
+          <div className="w-80 opacity-80">
+            <KanbanCard lead={activeLead} />
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }
