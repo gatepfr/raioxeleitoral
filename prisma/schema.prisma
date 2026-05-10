@@ -44,6 +44,7 @@ model CandidateSocial {
 model MyCandidate {
   id               String      @id @default(uuid())
   nome             String
+  partido          String?
   cpf              String?
   email            String?
   telefone         String

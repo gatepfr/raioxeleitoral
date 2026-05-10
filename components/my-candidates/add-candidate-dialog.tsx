@@ -22,6 +22,7 @@ export function AddCandidateDialog({ onSuccess }: AddCandidateDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
+    partido: "",
     telefone: "",
     email: "",
     uf: "",
@@ -58,6 +59,7 @@ export function AddCandidateDialog({ onSuccess }: AddCandidateDialogProps) {
       setOpen(false);
       setFormData({
         nome: "",
+        partido: "",
         telefone: "",
         email: "",
         uf: "",
@@ -100,6 +102,17 @@ export function AddCandidateDialog({ onSuccess }: AddCandidateDialogProps) {
                 value={formData.nome}
                 onChange={handleChange}
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="partido" className="text-sm font-medium">
+                Partido
+              </label>
+              <Input
+                id="partido"
+                placeholder="Ex: PT, PL, MDB"
+                value={formData.partido}
+                onChange={handleChange}
               />
             </div>
             <div className="space-y-2">

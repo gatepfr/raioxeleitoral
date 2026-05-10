@@ -9,7 +9,7 @@ export async function GET(
     const lead = await db.lead.findUnique({
       where: { id: params.id },
       include: {
-        candidate: true,
+        my_candidate: true,
         interactions: true,
       },
     });

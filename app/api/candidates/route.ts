@@ -18,12 +18,30 @@ export async function GET(request: Request) {
       orderBy: { nome_completo: 'asc' },
       include: {
         assets: true,
-        socials: true,
+        socials: true
+      }
+    })
+
+    // Manual join with MyCandidate/Lead to check if captured
+    const sq_candidatos = candidates.map(c => c.sq_candidato)
+    const capturedCandidates = await db.myCandidate.findMany({
+      where: {
+        tse_id: { in: sq_candidatos }
+      },
+      include: {
         lead: true
       }
     })
 
-    return NextResponse.json(candidates)
+    const candidatesWithLead = candidates.map(candidate => {
+      const myCandidate = capturedCandidates.find(mc => mc.tse_id === candidate.sq_candidato)
+      return {
+        ...candidate,
+        lead: myCandidate?.lead || null
+      }
+    })
+
+    return NextResponse.json(candidatesWithLead)
   } catch (error) {
     console.error("API Error:", error)
     return NextResponse.json({ error: "Failed to fetch candidates" }, { status: 500 })

@@ -42,13 +42,32 @@ export interface Interaction {
 
 export interface Lead {
   id: string;
-  candidate_id: string;
-  candidate: Candidate;
+  my_candidate_id: string;
+  my_candidate?: MyCandidate;
   status: LeadStatus;
   vendedor_responsavel: string | null;
   valor_contrato: number | null;
   data_proxima_acao: string | Date | null;
   interactions?: Interaction[];
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export interface MyCandidate {
+  id: string;
+  nome: string;
+  partido: string | null;
+  cpf: string | null;
+  email: string | null;
+  telefone: string;
+  uf: string;
+  municipio: string;
+  cargo: string;
+  origem_indicacao: string | null;
+  rede_social: string | null;
+  tipo_origem: string;
+  tse_id: string | null;
+  lead?: Lead | null;
   createdAt: string | Date;
   updatedAt: string | Date;
 }

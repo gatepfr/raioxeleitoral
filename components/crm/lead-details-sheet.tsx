@@ -46,7 +46,9 @@ export function LeadDetailsSheet({
   const [tipoContato, setTipoContato] = useState<InteractionType>('WHATSAPP');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!lead) return null;
+  const candidate = lead.my_candidate;
+
+  if (!candidate) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,9 +81,9 @@ export function LeadDetailsSheet({
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{lead.candidate.nome_completo}</SheetTitle>
+          <SheetTitle>{candidate.nome}</SheetTitle>
           <div className="text-sm text-muted-foreground">
-            {lead.candidate.partido} - {lead.candidate.cargo}
+            {candidate.partido || 'Sem partido'} - {candidate.cargo}
           </div>
         </SheetHeader>
 
@@ -90,7 +92,7 @@ export function LeadDetailsSheet({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-semibold block">Município</span>
-              {lead.candidate.municipio} - {lead.candidate.uf}
+              {candidate.municipio} - {candidate.uf}
             </div>
             <div>
               <span className="font-semibold block">Status</span>
