@@ -18,6 +18,7 @@ interface FilterBarProps {
 
 export function FilterBar({ onSearch }: FilterBarProps) {
   const [states, setStates] = useState<{sigla: string, nome: string}[]>([]);
+  const [cities, setCities] = useState<{nome: string}[]>([]);
   const [uf, setUf] = useState("");
   const [municipio, setMunicipio] = useState("");
   const [partido, setPartido] = useState("");
@@ -30,6 +31,22 @@ export function FilterBar({ onSearch }: FilterBarProps) {
       .then(res => res.json())
       .then(data => setStates(data));
   }, []);
+
+  useEffect(() => {
+    if (uf) {
+      fetch(`/api/locations?type=cities&uf=${uf}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setCities(data);
+          } else {
+            setCities([]);
+          }
+        });
+    } else {
+      setCities([]);
+    }
+  }, [uf]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,13 +79,19 @@ export function FilterBar({ onSearch }: FilterBarProps) {
             ))}
           </select>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 lg:col-span-2">
           <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Município</label>
-          <Input
-            placeholder="Ex: São Paulo"
+          <select 
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             value={municipio}
             onChange={(e) => setMunicipio(e.target.value)}
-          />
+            disabled={!uf}
+          >
+            <option value="">{uf ? "Selecione o município..." : "Selecione uma UF primeiro"}</option>
+            {cities.map(c => (
+              <option key={c.nome} value={c.nome}>{c.nome}</option>
+            ))}
+          </select>
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nome na Urna</label>
