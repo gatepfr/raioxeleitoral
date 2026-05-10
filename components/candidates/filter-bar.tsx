@@ -13,12 +13,21 @@ export function FilterBar({ onSearch }: FilterBarProps) {
   const [uf, setUf] = useState("");
   const [municipio, setMunicipio] = useState("");
 
-  const handleSearch = () => {
-    onSearch({ uf, municipio });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch({ 
+      uf: uf.trim(), 
+      municipio: municipio.trim() 
+    });
+  };
+
+  const handleUfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+    setUf(value);
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 items-end bg-card p-4 rounded-lg border shadow-sm">
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 items-end bg-card p-4 rounded-lg border shadow-sm">
       <div className="grid w-full max-w-sm items-center gap-1.5">
         <label htmlFor="uf" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           UF
@@ -28,7 +37,7 @@ export function FilterBar({ onSearch }: FilterBarProps) {
           id="uf"
           placeholder="Ex: SP"
           value={uf}
-          onChange={(e) => setUf(e.target.value.toUpperCase())}
+          onChange={handleUfChange}
           maxLength={2}
           className="w-20"
         />
@@ -45,10 +54,10 @@ export function FilterBar({ onSearch }: FilterBarProps) {
           onChange={(e) => setMunicipio(e.target.value)}
         />
       </div>
-      <Button onClick={handleSearch} className="flex items-center gap-2">
+      <Button type="submit" className="flex items-center gap-2">
         <Search className="h-4 w-4" />
         Filtrar
       </Button>
-    </div>
+    </form>
   );
 }
