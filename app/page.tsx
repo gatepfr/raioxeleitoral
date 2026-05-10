@@ -20,6 +20,7 @@ export default function Home() {
     uf: "", 
     municipio: "", 
     partido: "", 
+    nomeUrna: "",
     minPatrimonio: "", 
     maxPatrimonio: "",
     sortBy: "nome_urna",
@@ -35,6 +36,7 @@ export default function Home() {
       if (filters.uf) params.append("uf", filters.uf);
       if (filters.municipio) params.append("municipio", filters.municipio);
       if (filters.partido) params.append("partido", filters.partido);
+      if (filters.nomeUrna) params.append("nomeUrna", filters.nomeUrna);
       if (filters.minPatrimonio) params.append("minPatrimonio", filters.minPatrimonio);
       if (filters.maxPatrimonio) params.append("maxPatrimonio", filters.maxPatrimonio);
       params.append("sortBy", filters.sortBy);
