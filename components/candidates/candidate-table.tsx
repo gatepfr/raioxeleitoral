@@ -13,9 +13,10 @@ import { Candidate } from "@/types";
 
 interface CandidateTableProps {
   candidates: Candidate[];
+  onViewDossier: (candidate: Candidate) => void;
 }
 
-export function CandidateTable({ candidates }: CandidateTableProps) {
+export function CandidateTable({ candidates, onViewDossier }: CandidateTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -45,7 +46,11 @@ export function CandidateTable({ candidates }: CandidateTableProps) {
                   {candidate.municipio} - {candidate.uf}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => onViewDossier(candidate)}
+                  >
                     Dossiê
                   </Button>
                 </TableCell>
