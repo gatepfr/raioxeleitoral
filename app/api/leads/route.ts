@@ -4,18 +4,18 @@ import { db } from "@/lib/db";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { candidateId } = body;
+    const { candidate_id } = body;
 
-    if (!candidateId) {
+    if (!candidate_id) {
       return NextResponse.json(
-        { error: "candidateId is required" },
+        { error: "candidate_id is required" },
         { status: 400 }
       );
     }
 
     // Check if candidate exists
     const candidate = await db.candidate.findUnique({
-      where: { id: candidateId },
+      where: { id: candidate_id },
     });
 
     if (!candidate) {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     // Check if lead already exists for this candidate
     const existingLead = await db.lead.findUnique({
-      where: { candidate_id: candidateId },
+      where: { candidate_id: candidate_id },
     });
 
     if (existingLead) {
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
     const lead = await db.lead.create({
       data: {
-        candidate_id: candidateId,
+        candidate_id: candidate_id,
         status: "PROSPECT",
       },
     });
@@ -58,7 +58,17 @@ export async function GET() {
   try {
     const leads = await db.lead.findMany({
       include: {
-        candidate: true,
+        candidate: {
+          include: {
+            assets: true,
+            socials: true,
+          },
+        },
+        interactions: {
+          orderBy: {
+            data_registro: 'desc',
+          },
+        },
       },
     });
     return NextResponse.json(leads);

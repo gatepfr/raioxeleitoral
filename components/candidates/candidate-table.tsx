@@ -10,13 +10,15 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Candidate } from "@/types";
+import Link from "next/link";
 
 interface CandidateTableProps {
   candidates: Candidate[];
   onViewDossier: (candidate: Candidate) => void;
+  onCaptureLead: (candidateId: string) => void;
 }
 
-export function CandidateTable({ candidates, onViewDossier }: CandidateTableProps) {
+export function CandidateTable({ candidates, onViewDossier, onCaptureLead }: CandidateTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -45,7 +47,7 @@ export function CandidateTable({ candidates, onViewDossier }: CandidateTableProp
                 <TableCell>
                   {candidate.municipio} - {candidate.uf}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right space-x-2">
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -53,6 +55,19 @@ export function CandidateTable({ candidates, onViewDossier }: CandidateTableProp
                   >
                     Dossiê
                   </Button>
+                  {candidate.lead ? (
+                    <Button variant="secondary" size="sm" asChild>
+                      <Link href="/crm">Ver no CRM</Link>
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={() => onCaptureLead(candidate.id)}
+                    >
+                      Capturar Lead
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))

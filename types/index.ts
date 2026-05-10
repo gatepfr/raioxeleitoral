@@ -25,9 +25,20 @@ export interface Candidate {
   situacao_candidatura: string;
   assets: Asset[];
   socials: Social[];
+  lead?: Lead | null;
 }
 
 export type LeadStatus = 'PROSPECT' | 'CONTATADO' | 'REUNIAO' | 'PROPOSTA' | 'FECHADO' | 'PERDIDO';
+
+export type InteractionType = 'WHATSAPP' | 'CALL' | 'MEETING' | 'EMAIL' | 'OTHER';
+
+export interface Interaction {
+  id: string;
+  lead_id: string;
+  anotacao: string;
+  tipo_contato: InteractionType;
+  data_registro: string | Date;
+}
 
 export interface Lead {
   id: string;
@@ -37,6 +48,7 @@ export interface Lead {
   vendedor_responsavel: string | null;
   valor_contrato: number | null;
   data_proxima_acao: string | Date | null;
+  interactions?: Interaction[];
   createdAt: string | Date;
   updatedAt: string | Date;
 }

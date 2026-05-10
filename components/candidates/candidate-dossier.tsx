@@ -17,17 +17,21 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { User, Wallet, Share2, ExternalLink } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 interface CandidateDossierProps {
   candidate: Candidate | null
   isOpen: boolean
   onOpenChange: (open: boolean) => void
+  onCaptureLead: (candidateId: string) => void
 }
 
 export function CandidateDossier({
   candidate,
   isOpen,
   onOpenChange,
+  onCaptureLead,
 }: CandidateDossierProps) {
   if (!candidate) return null
 
@@ -136,6 +140,22 @@ export function CandidateDossier({
               <p className="text-sm text-muted-foreground italic">
                 Nenhuma rede social informada.
               </p>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Fechar
+            </Button>
+            {candidate.lead ? (
+              <Button variant="secondary" asChild>
+                <Link href="/crm">Ver no CRM</Link>
+              </Button>
+            ) : (
+              <Button onClick={() => onCaptureLead(candidate.id)}>
+                Capturar Lead
+              </Button>
             )}
           </div>
         </div>

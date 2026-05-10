@@ -5,7 +5,9 @@ import { FilterBar } from "@/components/candidates/filter-bar";
 import { CandidateTable } from "@/components/candidates/candidate-table";
 import { CandidateDossier } from "@/components/candidates/candidate-dossier";
 import { Candidate } from "@/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, LayoutDashboard } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Home() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -15,28 +17,28 @@ export default function Home() {
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [filters, setFilters] = useState({ uf: "", municipio: "" });
 
+  const fetchCandidates = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      if (filters.uf) params.append("uf", filters.uf);
+      if (filters.municipio) params.append("municipio", filters.municipio);
+
+      const response = await fetch(`/api/candidates?${params.toString()}`);
+      if (!response.ok) throw new Error("Falha ao carregar candidatos. Por favor, tente novamente.");
+      
+      const data = await response.json();
+      setCandidates(data);
+    } catch (error) {
+      console.error("Error fetching candidates:", error);
+      setError(error instanceof Error ? error.message : "Ocorreu um erro inesperado.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCandidates = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const params = new URLSearchParams();
-        if (filters.uf) params.append("uf", filters.uf);
-        if (filters.municipio) params.append("municipio", filters.municipio);
-
-        const response = await fetch(`/api/candidates?${params.toString()}`);
-        if (!response.ok) throw new Error("Falha ao carregar candidatos. Por favor, tente novamente.");
-        
-        const data = await response.json();
-        setCandidates(data);
-      } catch (error) {
-        console.error("Error fetching candidates:", error);
-        setError(error instanceof Error ? error.message : "Ocorreu um erro inesperado.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchCandidates();
   }, [filters]);
 
@@ -49,16 +51,49 @@ export default function Home() {
     setIsDossierOpen(true);
   };
 
+  const handleCaptureLead = async (candidateId: string) => {
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ candidate_id: candidateId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Falha ao capturar lead.");
+      }
+
+      alert("Lead capturado com sucesso!");
+      // Refresh candidates to update the "Ver no CRM" button
+      fetchCandidates();
+    } catch (error) {
+      console.error("Error capturing lead:", error);
+      alert(error instanceof Error ? error.message : "Erro ao capturar lead.");
+    }
+  };
+
   return (
     <main className="min-h-screen bg-zinc-50/50 dark:bg-zinc-950">
       <div className="container mx-auto py-10 px-4 space-y-8">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Prospecção de Candidatos
-          </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Explore e analise candidatos das eleições municipais de 2024.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Prospecção de Candidatos
+            </h1>
+            <p className="text-lg text-zinc-600 dark:text-zinc-400">
+              Explore e analise candidatos das eleições municipais de 2024.
+            </p>
+          </div>
+          
+          <Button asChild className="w-fit">
+            <Link href="/crm" className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              Ver Quadro de Vendas
+            </Link>
+          </Button>
         </div>
 
         <FilterBar onSearch={handleSearch} />
@@ -82,6 +117,7 @@ export default function Home() {
             <CandidateTable 
               candidates={candidates} 
               onViewDossier={handleViewDossier} 
+              onCaptureLead={handleCaptureLead}
             />
           )}
         </div>
@@ -90,6 +126,7 @@ export default function Home() {
           candidate={selectedCandidate}
           isOpen={isDossierOpen}
           onOpenChange={setIsDossierOpen}
+          onCaptureLead={handleCaptureLead}
         />
       </div>
     </main>

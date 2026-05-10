@@ -18,7 +18,8 @@ export async function GET(request: Request) {
       orderBy: { nome_completo: 'asc' },
       include: {
         assets: true,
-        socials: true
+        socials: true,
+        lead: true
       }
     })
 
