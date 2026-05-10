@@ -23,6 +23,8 @@ export interface Candidate {
   uf: string;
   municipio: string;
   situacao_candidatura: string;
+  ano_ultima_eleicao: number;
+  patrimonio_total: number;
   assets: Asset[];
   socials: Social[];
   lead?: Lead | null;

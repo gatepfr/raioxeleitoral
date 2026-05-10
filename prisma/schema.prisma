@@ -1,50 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model Candidate {
-  id                  String            @id @default(uuid())
-  sq_candidato        String            @unique
-  nome_completo       String
-  nome_urna           String
-  cpf                 String
-  email_tse           String?
-  partido             String
-  cargo               String
-  uf                  String
-  municipio           String
+  id                   String            @id @default(uuid())
+  sq_candidato         String
+  nome_completo        String
+  nome_urna            String
+  cpf                  String            @unique
+  email_tse            String?
+  partido              String
+  cargo                String
+  uf                   String
+  municipio            String
   situacao_candidatura String
-  assets              CandidateAsset[]
-  socials             CandidateSocial[]
-  updatedAt           DateTime          @updatedAt
+  updatedAt            DateTime          @updatedAt
+  ano_ultima_eleicao   Int               @default(2024)
+  patrimonio_total     Float             @default(0)
+  assets               CandidateAsset[]
+  socials              CandidateSocial[]
 }
 
 model CandidateAsset {
   id           String    @id @default(uuid())
   candidate_id String
-  candidate    Candidate @relation(fields: [candidate_id], references: [id])
   tipo_bem     String
   descricao    String
   valor        Float
+  candidate    Candidate @relation(fields: [candidate_id], references: [id])
 }
 
 model CandidateSocial {
   id           String    @id @default(uuid())
   candidate_id String
-  candidate    Candidate @relation(fields: [candidate_id], references: [id])
   tipo_rede    String
   url          String
+  candidate    Candidate @relation(fields: [candidate_id], references: [id])
 }
 
 model MyCandidate {
-  id               String      @id @default(uuid())
+  id               String   @id @default(uuid())
   nome             String
-  partido          String?
   cpf              String?
   email            String?
   telefone         String
@@ -53,31 +54,32 @@ model MyCandidate {
   cargo            String
   origem_indicacao String?
   rede_social      String?
-  tipo_origem      String      @default("MANUAL") // TSE, MANUAL
-  tse_id           String?     // Link to Candidate.sq_candidato if from TSE
+  tipo_origem      String   @default("MANUAL")
+  tse_id           String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  partido          String?
   lead             Lead?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
 }
 
 model Lead {
-  id                   String       @id @default(uuid())
-  my_candidate_id      String       @unique
-  my_candidate         MyCandidate  @relation(fields: [my_candidate_id], references: [id])
-  status               String       @default("PROSPECT") // PROSPECT, CONTATADO, REUNIAO, PROPOSTA, FECHADO, PERDIDO
+  id                   String        @id @default(uuid())
+  status               String        @default("PROSPECT")
   vendedor_responsavel String?
   valor_contrato       Float?
   data_proxima_acao    DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  my_candidate_id      String        @unique
   interactions         Interaction[]
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
+  my_candidate         MyCandidate   @relation(fields: [my_candidate_id], references: [id])
 }
 
 model Interaction {
   id            String   @id @default(uuid())
   lead_id       String
-  lead          Lead     @relation(fields: [lead_id], references: [id])
   anotacao      String
-  tipo_contato  String   // WHATSAPP, CALL, MEETING
+  tipo_contato  String
   data_registro DateTime @default(now())
+  lead          Lead     @relation(fields: [lead_id], references: [id])
 }

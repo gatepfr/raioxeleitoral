@@ -4,10 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { MyCandidateTable } from "@/components/my-candidates/my-candidate-table";
 import { FilterBar } from "@/components/candidates/filter-bar";
 import { AddCandidateDialog } from "@/components/my-candidates/add-candidate-dialog";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { MyCandidate } from "@/types";
+import { MainLayout } from "@/components/layout/main-layout";
 
 export default function MyCandidatesPage() {
   const [candidates, setCandidates] = useState<MyCandidate[]>([]);
@@ -45,22 +44,14 @@ export default function MyCandidatesPage() {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-50/50 dark:bg-zinc-950">
-      <div className="container mx-auto py-10 px-4 space-y-8">
+    <MainLayout>
+      <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild className="-ml-2 h-8">
-                <Link href="/">
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Voltar para Prospecção
-                </Link>
-              </Button>
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
               Meus Candidatos
             </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400">
+            <p className="text-base text-zinc-500 dark:text-zinc-400">
               Gerencie os candidatos que você capturou ou adicionou manualmente.
             </p>
           </div>
@@ -72,11 +63,11 @@ export default function MyCandidatesPage() {
 
         <FilterBar onSearch={handleSearch} />
 
-        <div className="bg-white dark:bg-zinc-900 rounded-xl border shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-64 gap-4">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-zinc-600 dark:text-zinc-400 font-medium">
+              <p className="text-zinc-500 text-sm font-medium">
                 Carregando seus candidatos...
               </p>
             </div>
@@ -85,6 +76,6 @@ export default function MyCandidatesPage() {
           )}
         </div>
       </div>
-    </main>
+    </MainLayout>
   );
 }

@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { User, Wallet, Share2, ExternalLink } from "lucide-react"
+import { User, Wallet, Share2, ExternalLink, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
@@ -35,7 +35,7 @@ export function CandidateDossier({
 }: CandidateDossierProps) {
   if (!candidate) return null
 
-  const totalAssets = candidate.assets.reduce((acc, asset) => acc + asset.valor, 0)
+  const totalAssets = candidate.assets?.reduce((acc, asset) => acc + asset.valor, 0) ?? 0
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -83,7 +83,7 @@ export function CandidateDossier({
               </p>
             </div>
 
-            {candidate.assets.length > 0 ? (
+            {candidate.assets && candidate.assets.length > 0 ? (
               <div className="border rounded-md">
                 <Table>
                   <TableHeader>
@@ -121,7 +121,7 @@ export function CandidateDossier({
               <Share2 className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">Redes Sociais</h3>
             </div>
-            {candidate.socials.length > 0 ? (
+            {candidate.socials && candidate.socials.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {candidate.socials.map((social) => (
                   <a
@@ -147,6 +147,12 @@ export function CandidateDossier({
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Fechar
+            </Button>
+            <Button variant="outline" asChild>
+              <a href={`/dossie/print/${candidate.id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Gerar PDF
+              </a>
             </Button>
             {candidate.lead ? (
               <Button variant="secondary" asChild>
