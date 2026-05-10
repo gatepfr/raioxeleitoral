@@ -3,11 +3,12 @@ import { db } from "@/lib/db";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const lead = await db.lead.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         my_candidate: true,
         interactions: true,
@@ -30,9 +31,10 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { status } = body;
 
@@ -41,7 +43,7 @@ export async function PATCH(
     }
 
     const lead = await db.lead.update({
-      where: { id: params.id },
+      where: { id },
       data: { status },
     });
 
@@ -57,11 +59,12 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await db.lead.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return new NextResponse(null, { status: 204 });

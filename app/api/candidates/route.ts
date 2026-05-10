@@ -24,15 +24,15 @@ export async function GET(request: Request) {
     // Map frontend "Localidade" to database "municipio"
     const dbSortBy = sortBy === "localidade" ? "municipio" : sortBy
 
-    const where = {
+    const where: any = {
       ...(uf && { uf: { equals: uf, mode: 'insensitive' } }),
       ...(municipio && { municipio: { equals: municipio, mode: 'insensitive' } }),
       ...(cargo && { cargo: { contains: cargo, mode: 'insensitive' } }),
       ...(partido && { partido: { equals: partido, mode: 'insensitive' } }),
-      ...((!isNaN(minPatrimonio as number) && minPatrimonio !== null || !isNaN(maxPatrimonio as number) && maxPatrimonio !== null) && {
+      ...((minPatrimonio !== null || maxPatrimonio !== null) && {
         patrimonio_total: {
-          ...(minPatrimonio !== null && !isNaN(minPatrimonio) && { gte: minPatrimonio }),
-          ...(maxPatrimonio !== null && !isNaN(maxPatrimonio) && { lte: maxPatrimonio }),
+          ...(minPatrimonio !== null && { gte: minPatrimonio }),
+          ...(maxPatrimonio !== null && { lte: maxPatrimonio }),
         }
       }),
     }

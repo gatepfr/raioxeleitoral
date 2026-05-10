@@ -46,9 +46,9 @@ export function LeadDetailsSheet({
   const [tipoContato, setTipoContato] = useState<InteractionType>('WHATSAPP');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const candidate = lead.my_candidate;
+  if (!lead || !lead.my_candidate) return null;
 
-  if (!candidate) return null;
+  const candidate = lead.my_candidate;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

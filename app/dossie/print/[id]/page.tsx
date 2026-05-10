@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { User, Wallet, Share2, Globe, FileText } from "lucide-react";
+import { User, Wallet, Share2, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { PrintButton } from "@/components/candidates/print-button";
 
 async function getCandidateData(id: string) {
   const candidate = await db.candidate.findUnique({
@@ -18,9 +19,10 @@ async function getCandidateData(id: string) {
 export default async function DossiePrintPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const candidate = await getCandidateData(params.id);
+  const { id } = await params;
+  const candidate = await getCandidateData(id);
 
   if (!candidate) {
     notFound();
@@ -35,16 +37,10 @@ export default async function DossiePrintPage({
   };
 
   return (
-    <div className="bg-white min-h-screen p-8 text-black print:p-0">
+    <div className="bg-white min-h-screen p-8 text-black print:p-0 print:bg-white">
       {/* Print button - hidden during actual print */}
       <div className="flex justify-end mb-8 print:hidden">
-        <button
-          onClick={() => window.print()}
-          className="bg-primary text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:opacity-90"
-        >
-          <FileText className="h-5 w-5" />
-          Imprimir Dossiê / Salvar PDF
-        </button>
+        <PrintButton />
       </div>
 
       {/* Dossier Content */}
@@ -179,15 +175,6 @@ export default async function DossiePrintPage({
           Documento Confidencial - Propriedade da Agência Iceberg
         </div>
       </div>
-
-      <style jsx global>{`
-        @media print {
-          body { background: white !important; }
-          .print\:hidden { display: none !important; }
-          .print\:p-0 { padding: 0 !important; }
-          @page { margin: 1cm; }
-        }
-      `}</style>
     </div>
   );
 }

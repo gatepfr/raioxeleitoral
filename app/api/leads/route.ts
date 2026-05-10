@@ -41,10 +41,10 @@ export async function POST(request: Request) {
 
       // Use transaction to create MyCandidate and Lead
       const result = await db.$transaction(async (tx) => {
-        let myCandidate = existingMyCandidate;
+        let myCandidateId = existingMyCandidate?.id;
 
-        if (!myCandidate) {
-          myCandidate = await tx.myCandidate.create({
+        if (!myCandidateId) {
+          const newMyCandidate = await tx.myCandidate.create({
             data: {
               nome: candidate.nome_completo,
               partido: candidate.partido,
@@ -58,11 +58,12 @@ export async function POST(request: Request) {
               email: candidate.email_tse,
             },
           });
+          myCandidateId = newMyCandidate.id;
         }
 
         const lead = await tx.lead.create({
           data: {
-            my_candidate_id: myCandidate.id,
+            my_candidate_id: myCandidateId,
             status: "PROSPECT",
           },
         });
