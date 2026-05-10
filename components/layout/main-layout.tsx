@@ -15,10 +15,10 @@ export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();
 
   const navigation = [
-    { name: "Prospecção", href: "/", icon: UserPlus },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Prospecção TSE", href: "/", icon: UserPlus },
     { name: "Meus Candidatos", href: "/my-candidates", icon: Users },
     { name: "Quadro de Vendas", href: "/crm", icon: LayoutDashboard },
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   ];
 
   return (
