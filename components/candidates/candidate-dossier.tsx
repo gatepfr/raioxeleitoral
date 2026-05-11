@@ -115,6 +115,36 @@ export function CandidateDossier({
             )}
           </div>
 
+          {/* Electoral Performance */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b pb-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-semibold">Desempenho Eleitoral ({candidate.ano_ultima_eleicao})</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
+                <p className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">Total de Votos</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  {candidate.total_votos?.toLocaleString() ?? 0}
+                </p>
+              </div>
+              <div className="bg-pink-50 dark:bg-pink-900/20 p-4 rounded-lg border border-pink-100 dark:border-pink-800">
+                <p className="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400 mb-1">Total Gasto</p>
+                <p className="text-2xl font-bold text-pink-700 dark:text-pink-300">
+                  {formatCurrency(candidate.total_despesas ?? 0)}
+                </p>
+              </div>
+              <div className="bg-zinc-50 dark:bg-zinc-900/20 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                <p className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1">Custo por Voto</p>
+                <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">
+                  {candidate.total_votos > 0 
+                    ? formatCurrency((candidate.total_despesas ?? 0) / candidate.total_votos)
+                    : "R$ 0,00"}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Social Media */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b pb-2">

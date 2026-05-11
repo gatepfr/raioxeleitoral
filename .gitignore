@@ -33,3 +33,10 @@ __pycache__/
 venv/
 shared-data/
 .superpowers/
+
+# Temporary / Test files
+*.bak
+test-db.ts
+check-performance-data.ts
+images.jpg
+logo.png
