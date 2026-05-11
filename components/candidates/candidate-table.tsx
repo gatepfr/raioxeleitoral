@@ -76,17 +76,20 @@ export function CandidateTable({
           ) : (
             candidates.map((candidate) => (
               <TableRow key={candidate.id}>
-                <TableCell className="font-medium">{candidate.nome_urna}</TableCell>
-                <TableCell>{candidate.partido}</TableCell>
-                <TableCell>{candidate.cargo}</TableCell>
                 <TableCell>
-                  {candidate.municipio} - {candidate.uf}
+                  <div className="font-medium">{candidate.nome_urna}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Patrimônio: {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(candidate.patrimonio_total)}
+                  </div>
                 </TableCell>
-                <TableCell className="text-right font-semibold text-zinc-700 dark:text-zinc-300">
-                  {new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  }).format(candidate.patrimonio_total)}
+                <TableCell>
+                  <div>{candidate.cargo} - {candidate.partido}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {candidate.municipio} - {candidate.uf}
+                  </div>
                 </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button 
