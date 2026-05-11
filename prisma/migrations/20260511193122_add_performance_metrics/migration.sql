@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Candidate" ADD COLUMN     "total_despesas" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "total_votos" INTEGER NOT NULL DEFAULT 0;

@@ -12,7 +12,8 @@ model Candidate {
   sq_candidato         String
   nome_completo        String
   nome_urna            String
-  cpf                  String            @unique
+  cpf                  String
+  titulo_eleitor       String            @unique
   email_tse            String?
   partido              String
   cargo                String
@@ -22,6 +23,8 @@ model Candidate {
   updatedAt            DateTime          @updatedAt
   ano_ultima_eleicao   Int               @default(2024)
   patrimonio_total     Float             @default(0)
+  total_votos          Int               @default(0)
+  total_despesas       Float             @default(0)
   assets               CandidateAsset[]
   socials              CandidateSocial[]
 }
