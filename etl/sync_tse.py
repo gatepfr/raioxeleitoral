@@ -29,14 +29,17 @@ def setup_directories():
 
 def download_tse_data(year, category):
     """Download ZIP file from TSE URL for a specific year and category."""
-    # Note: URLs vary by year and category. This is a simplified version.
-    # For 2024: https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/consulta_cand_2024.zip
-    # For others, patterns change. We assume files are provided or we map them.
     base_url = "https://cdn.tse.jus.br/estatistica/sead/odsele"
+    
+    # 2024 and 2022 use different paths for socials
+    social_url = f"{base_url}/consulta_cand/rede_social_candidato_{year}.zip"
+    
     urls = {
         "candidates": f"{base_url}/consulta_cand/consulta_cand_{year}.zip",
         "assets": f"{base_url}/bem_candidato/bem_candidato_{year}.zip",
-        "socials": f"{base_url}/rede_social_cand/rede_social_cand_{year}.zip"
+        "socials": social_url,
+        "votes": f"{base_url}/votacao_candidato_munzona/votacao_candidato_munzona_{year}.zip",
+        "expenses": f"{base_url}/prestacao_contas_eleitorais_{year}.zip"
     }
     
     url = urls.get(category)
@@ -67,9 +70,12 @@ def extract_zip(zip_path, extract_to):
     """Extract ZIP file to target directory."""
     if not zip_path: return
     logger.info(f"Extracting {zip_path} to {extract_to}...")
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
-    logger.info("Extraction complete")
+    try:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+        logger.info("Extraction complete")
+    except Exception as e:
+        logger.error(f"Failed to extract {zip_path}: {e}")
 
 def process_year(year, engine):
     """Process all files for a specific election year."""
@@ -87,6 +93,7 @@ def process_year(year, engine):
         'NM_CANDIDATO': 'nome_completo',
         'NM_URNA_CANDIDATO': 'nome_urna',
         'NR_CPF_CANDIDATO': 'cpf',
+        'NR_TITULO_ELEITORAL_CANDIDATO': 'titulo_eleitor',
         'NM_EMAIL': 'email_tse',
         'SG_PARTIDO': 'partido',
         'DS_CARGO': 'cargo',
@@ -118,21 +125,23 @@ def process_year(year, engine):
                 df_filtered[col] = df_filtered[col].astype(str).str.strip()
 
         df_filtered['cpf'] = df_filtered['cpf'].astype(str).str.zfill(11)
+        df_filtered['titulo_eleitor'] = df_filtered['titulo_eleitor'].astype(str).str.zfill(12)
         df_filtered['sq_candidato'] = df_filtered['sq_candidato'].astype(str)
         df_filtered['ano_ultima_eleicao'] = year
         df_filtered['updatedAt'] = pd.Timestamp.now()
 
-        # UPSERT Logic using raw SQL for performance and CPF constraint
+        # UPSERT Logic using raw SQL for performance and Título de Eleitor constraint
         # This will update the profile only if the election year is newer or same
         with engine.connect() as conn:
             for _, row in df_filtered.iterrows():
                 conn.execute(text("""
-                    INSERT INTO "Candidate" (id, sq_candidato, nome_completo, nome_urna, cpf, email_tse, partido, cargo, uf, municipio, situacao_candidatura, ano_ultima_eleicao, "updatedAt")
-                    VALUES (:id, :sq_candidato, :nome_completo, :nome_urna, :cpf, :email_tse, :partido, :cargo, :uf, :municipio, :situacao_candidatura, :ano_ultima_eleicao, :updatedAt)
-                    ON CONFLICT (cpf) DO UPDATE SET
+                    INSERT INTO "Candidate" (id, sq_candidato, nome_completo, nome_urna, cpf, titulo_eleitor, email_tse, partido, cargo, uf, municipio, situacao_candidatura, ano_ultima_eleicao, "updatedAt")
+                    VALUES (:id, :sq_candidato, :nome_completo, :nome_urna, :cpf, :titulo_eleitor, :email_tse, :partido, :cargo, :uf, :municipio, :situacao_candidatura, :ano_ultima_eleicao, :updatedAt)
+                    ON CONFLICT (titulo_eleitor) DO UPDATE SET
                         sq_candidato = EXCLUDED.sq_candidato,
                         nome_completo = EXCLUDED.nome_completo,
                         nome_urna = EXCLUDED.nome_urna,
+                        cpf = EXCLUDED.cpf,
                         email_tse = EXCLUDED.email_tse,
                         partido = EXCLUDED.partido,
                         cargo = EXCLUDED.cargo,
@@ -203,7 +212,11 @@ def process_year(year, engine):
             conn.commit()
 
     # 3. Process Socials (Similar logic)
-    social_files = list(EXTRACT_DIR.glob(f"rede_social_cand_{year}_*.csv"))
+    # Glob for both patterns: rede_social_cand_ and rede_social_candidato_
+    social_files = list(EXTRACT_DIR.glob(f"rede_social_cand*_{year}_*.csv"))
+    if not social_files:
+        social_files = list(EXTRACT_DIR.glob(f"rede_social_candidato_{year}_*.csv"))
+        
     for csv_path in social_files:
         logger.info(f"Processing socials from {csv_path.name}...")
         df_socials = pd.read_csv(csv_path, sep=';', encoding='latin1')
@@ -212,6 +225,23 @@ def process_year(year, engine):
             res = conn.execute(text('SELECT id, sq_candidato FROM "Candidate" WHERE ano_ultima_eleicao = :year'), {"year": year})
             sq_to_id = {row[1]: row[0] for row in res}
             
+            # Normalize column names for 2024 vs legacy
+            if 'DS_URL' in df_socials.columns:
+                df_socials['url'] = df_socials['DS_URL']
+                # 2024 doesn't have a type column, we infer it from URL
+                def infer_type(url):
+                    url = str(url).lower()
+                    if 'instagram' in url: return 'INSTAGRAM'
+                    if 'facebook' in url: return 'FACEBOOK'
+                    if 'twitter' in url or 'x.com' in url: return 'X / TWITTER'
+                    if 'youtube' in url: return 'YOUTUBE'
+                    if 'tiktok' in url: return 'TIKTOK'
+                    return 'OUTRO'
+                df_socials['tipo_rede'] = df_socials['url'].apply(infer_type)
+            else:
+                df_socials['url'] = df_socials['NM_URL_REDE_SOCIAL']
+                df_socials['tipo_rede'] = df_socials['DS_TIPO_REDE_SOCIAL']
+
             df_socials['sq_candidato'] = df_socials['SQ_CANDIDATO'].astype(str)
             df_active_socials = df_socials[df_socials['sq_candidato'].isin(sq_to_id.keys())].copy()
             
@@ -226,10 +256,56 @@ def process_year(year, engine):
                     """), {
                         "id": str(uuid.uuid4()),
                         "candidate_id": sq_to_id[row['sq_candidato']],
-                        "tipo": row['DS_TIPO_REDE_SOCIAL'],
-                        "url": row['NM_URL_REDE_SOCIAL']
+                        "tipo": row['tipo_rede'],
+                        "url": row['url']
                     })
             conn.commit()
+
+    # 4. Process Votes
+    vote_files = list(EXTRACT_DIR.glob(f"votacao_candidato_munzona_{year}_*.csv"))
+    if vote_files:
+        logger.info(f"Processing votes for {year}...")
+        all_votes = []
+        for csv_path in vote_files:
+            try:
+                df_v = pd.read_csv(csv_path, sep=';', encoding='latin1', usecols=['SQ_CANDIDATO', 'QT_VOTOS_NOMINAIS'])
+                all_votes.append(df_v)
+            except Exception as e:
+                logger.warning(f"Could not process vote file {csv_path.name}: {e}")
+        
+        if all_votes:
+            df_votes = pd.concat(all_votes)
+            df_votes_agg = df_votes.groupby('SQ_CANDIDATO')['QT_VOTOS_NOMINAIS'].sum().reset_index()
+            
+            with engine.connect() as conn:
+                for _, row in df_votes_agg.iterrows():
+                    conn.execute(text('UPDATE "Candidate" SET total_votos = :votos WHERE sq_candidato = :sq AND ano_ultima_eleicao = :year'), 
+                                 {"votos": int(row['QT_VOTOS_NOMINAIS']), "sq": str(row['SQ_CANDIDATO']), "year": year})
+                conn.commit()
+
+    # 5. Process Expenses
+    expense_files = list(EXTRACT_DIR.glob(f"despesas_contratadas_candidatos_{year}_*.csv"))
+    if expense_files:
+        logger.info(f"Processing expenses for {year}...")
+        all_expenses = []
+        for csv_path in expense_files:
+            try:
+                df_e = pd.read_csv(csv_path, sep=';', encoding='latin1', usecols=['SQ_CANDIDATO', 'VR_DESPESA_CONTRATADA'])
+                all_expenses.append(df_e)
+            except Exception as e:
+                logger.warning(f"Could not process expense file {csv_path.name}: {e}")
+            
+        if all_expenses:
+            df_expenses = pd.concat(all_expenses)
+            # Robust parsing for VR_DESPESA_CONTRATADA
+            df_expenses['VR_DESPESA_CONTRATADA'] = df_expenses['VR_DESPESA_CONTRATADA'].astype(str).str.replace(',', '.').astype(float)
+            df_expenses_agg = df_expenses.groupby('SQ_CANDIDATO')['VR_DESPESA_CONTRATADA'].sum().reset_index()
+            
+            with engine.connect() as conn:
+                for _, row in df_expenses_agg.iterrows():
+                    conn.execute(text('UPDATE "Candidate" SET total_despesas = :despesas WHERE sq_candidato = :sq AND ano_ultima_eleicao = :year'), 
+                                 {"despesas": float(row['VR_DESPESA_CONTRATADA']), "sq": str(row['SQ_CANDIDATO']), "year": year})
+                conn.commit()
 
 def run_full_sync():
     setup_directories()
@@ -238,7 +314,7 @@ def run_full_sync():
     
     # Years to process in order
     years = [2018, 2020, 2022, 2024]
-    categories = ["candidates", "assets", "socials"]
+    categories = ["candidates", "assets", "socials", "votes", "expenses"]
     
     for year in years:
         logger.info(f"=== Starting Sync for {year} ===")
