@@ -50,17 +50,8 @@ export function CandidateTable({
               onClick={() => onSort("nome_urna")}
             >
               <div className="flex items-center">
-                Nome de Urna
+                Candidato / Info Financeira
                 {renderSortIcon("nome_urna")}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-zinc-50 transition-colors"
-              onClick={() => onSort("partido")}
-            >
-              <div className="flex items-center">
-                Partido
-                {renderSortIcon("partido")}
               </div>
             </TableHead>
             <TableHead 
@@ -68,26 +59,8 @@ export function CandidateTable({
               onClick={() => onSort("cargo")}
             >
               <div className="flex items-center">
-                Cargo
+                Atuação / Localidade
                 {renderSortIcon("cargo")}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="cursor-pointer hover:bg-zinc-50 transition-colors"
-              onClick={() => onSort("localidade")}
-            >
-              <div className="flex items-center">
-                Localidade
-                {renderSortIcon("localidade")}
-              </div>
-            </TableHead>
-            <TableHead 
-              className="text-right cursor-pointer hover:bg-zinc-50 transition-colors"
-              onClick={() => onSort("patrimonio_total")}
-            >
-              <div className="flex items-center justify-end">
-                Patrimônio
-                {renderSortIcon("patrimonio_total")}
               </div>
             </TableHead>
             <TableHead className="text-right">Ações</TableHead>
@@ -96,7 +69,7 @@ export function CandidateTable({
         <TableBody>
           {candidates.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="h-24 text-center">
+              <TableCell colSpan={3} className="h-24 text-center">
                 Nenhum candidato encontrado.
               </TableCell>
             </TableRow>
