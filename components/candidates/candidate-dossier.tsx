@@ -59,6 +59,7 @@ export function CandidateDossier({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-y-auto overflow-x-hidden p-0 gap-0 border-none">
+        {/* Header Black Section */}
         <div className="bg-zinc-950 text-white p-6 sm:p-10">
           <div className="flex justify-between items-start mb-8">
             <div className="space-y-1">
@@ -112,7 +113,33 @@ export function CandidateDossier({
           </div>
         </div>
 
+        {/* Content White Section */}
         <div className="p-6 sm:p-10 space-y-12 bg-background">
+          
+          {/* Social Media - High Priority now */}
+          {candidate.socials && candidate.socials.length > 0 && (
+            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-900/20 p-6 rounded-2xl border">
+              <div className="flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-bold tracking-tight">Canais Digitais Oficiais</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {candidate.socials.map((social) => (
+                  <a
+                    key={social.id}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-zinc-950 border shadow-sm hover:border-primary hover:text-primary hover:shadow-md transition-all text-sm font-bold"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    {social.tipo_rede}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Assets Summary */}
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b pb-4">
@@ -189,30 +216,6 @@ export function CandidateDossier({
               </div>
             </div>
           </div>
-
-          {/* Social Media */}
-          {candidate.socials && candidate.socials.length > 0 && (
-            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-900/20 p-6 rounded-2xl border">
-              <div className="flex items-center gap-2">
-                <Share2 className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-bold">Redes Sociais Oficiais</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {candidate.socials.map((social) => (
-                  <a
-                    key={social.id}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-zinc-950 border shadow-sm hover:border-primary hover:text-primary transition-all text-sm font-bold"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    {social.tipo_rede}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Actions */}
           <div className="flex flex-wrap justify-end gap-4 pt-8 border-t">
