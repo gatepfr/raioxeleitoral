@@ -28,9 +28,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
         <div className="p-6 flex items-center gap-3">
           <div className="w-10 h-10 relative">
-             <Image src="/logo.png" alt="Iceberg Logo" fill className="object-contain" />
+             <Image src="/raioxeleitoral.png" alt="Raio X Eleitoral Logo" fill className="object-contain" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-white">Iceberg CRM</span>
+          <span className="font-bold text-xl tracking-tight text-white">Raio X Eleitoral</span>
         </div>
         
         <nav className="flex-1 px-4 space-y-2 mt-4">

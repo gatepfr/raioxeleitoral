@@ -52,7 +52,7 @@ export default async function DossiePrintPage({
               Dossiê de Inteligência
             </h1>
             <p className="text-zinc-500 font-medium text-lg mt-1">
-              Iceberg CRM - Munição Comercial
+              Raio X Eleitoral - Munição Comercial
             </p>
           </div>
           <div className="text-right">
@@ -172,7 +172,7 @@ export default async function DossiePrintPage({
 
         {/* Footer for Print */}
         <div className="mt-12 pt-8 border-t text-center text-[10px] text-zinc-400 uppercase font-bold tracking-widest">
-          Documento Confidencial - Propriedade da Agência Iceberg
+          Documento Confidencial - Propriedade de Raio X Eleitoral
         </div>
       </div>
     </div>

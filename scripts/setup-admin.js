@@ -10,7 +10,7 @@ async function main() {
     create: {
       email: 'politicaiceberg@gmail.com',
       password: 'admin123',
-      name: 'Admin Iceberg'
+      name: 'Admin Raio X'
     }
   });
   console.log('Usuário Admin configurado:', user.email);

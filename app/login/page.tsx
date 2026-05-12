@@ -47,7 +47,7 @@ export default function LoginPage() {
           <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
             <LayoutDashboard className="h-6 w-6" />
           </div>
-          <h1 className="text-3xl font-black uppercase tracking-tighter">Iceberg CRM</h1>
+          <h1 className="text-3xl font-black uppercase tracking-tighter">Raio X Eleitoral</h1>
           <p className="text-muted-foreground font-medium">Munição Comercial de Elite</p>
         </div>
 
@@ -64,7 +64,7 @@ export default function LoginPage() {
                 <label className="text-sm font-bold uppercase text-zinc-500">E-mail</label>
                 <Input
                   type="email"
-                  placeholder="vendedor@iceberg.com"
+                  placeholder="vendedor@raioxeleitoral.com.br"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

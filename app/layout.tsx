@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Iceberg CRM",
+  title: "Raio X Eleitoral",
   description: "Prospecção Política Inteligente",
 };
 

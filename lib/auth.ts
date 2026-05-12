@@ -5,9 +5,9 @@ import { db } from "@/lib/db";
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "Agência Iceberg",
+      name: "Raio X Eleitoral",
       credentials: {
-        email: { label: "E-mail", type: "email", placeholder: "vendedor@iceberg.com" },
+        email: { label: "E-mail", type: "email", placeholder: "vendedor@raioxeleitoral.com.br" },
         password: { label: "Senha", type: "password" }
       },
       async authorize(credentials) {
