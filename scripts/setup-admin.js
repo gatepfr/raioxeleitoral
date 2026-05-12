@@ -1,7 +1,16 @@
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+
+// Garante que o script use a URL do banco definida no ambiente (essencial para Docker)
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
 
 async function main() {
+  console.log('Tentando conectar ao banco para configurar Admin...');
   const user = await prisma.user.upsert({
     where: { email: 'politicaiceberg@gmail.com' },
     update: {
