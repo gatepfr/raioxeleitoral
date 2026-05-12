@@ -34,12 +34,15 @@ def download_tse_data(year, category):
     # 2024 and 2022 use different paths for socials
     social_url = f"{base_url}/consulta_cand/rede_social_candidato_{year}.zip"
     
+    # Expense URL pattern is different and lives in /prestacao_contas/
+    expense_url = f"{base_url}/prestacao_contas/prestacao_de_contas_eleitorais_candidatos_{year}.zip"
+    
     urls = {
         "candidates": f"{base_url}/consulta_cand/consulta_cand_{year}.zip",
         "assets": f"{base_url}/bem_candidato/bem_candidato_{year}.zip",
         "socials": social_url,
         "votes": f"{base_url}/votacao_candidato_munzona/votacao_candidato_munzona_{year}.zip",
-        "expenses": f"{base_url}/prestacao_contas_eleitorais_{year}.zip"
+        "expenses": expense_url
     }
     
     url = urls.get(category)
@@ -106,19 +109,14 @@ def process_year(year, engine):
         logger.info(f"Consolidating candidates from {csv_path.name}...")
         df = pd.read_csv(csv_path, sep=';', encoding='latin1')
         
-        # Check which columns exist
         available_cols = [col for col in mapping.keys() if col in df.columns]
         actual_mapping = {col: mapping[col] for col in available_cols}
-        
-        # Prepare data
         df_filtered = df[available_cols].rename(columns=actual_mapping)
         
-        # Add missing columns with None
         for target_col in mapping.values():
             if target_col not in df_filtered.columns:
                 df_filtered[target_col] = None
 
-        # Trim whitespace from string columns to fix sorting issues
         string_cols = ['nome_completo', 'nome_urna', 'partido', 'cargo', 'uf', 'municipio']
         for col in string_cols:
             if col in df_filtered.columns:
@@ -130,8 +128,6 @@ def process_year(year, engine):
         df_filtered['ano_ultima_eleicao'] = year
         df_filtered['updatedAt'] = pd.Timestamp.now()
 
-        # UPSERT Logic using raw SQL for performance and Título de Eleitor constraint
-        # This will update the profile only if the election year is newer or same
         with engine.connect() as conn:
             for _, row in df_filtered.iterrows():
                 conn.execute(text("""
@@ -154,45 +150,30 @@ def process_year(year, engine):
                 """), {**row.to_dict(), 'id': str(uuid.uuid4())})
             conn.commit()
 
-    # 2. Process Assets (Only if it's the latest data for that candidate)
+    # 2. Process Assets
     asset_files = list(EXTRACT_DIR.glob(f"bem_candidato_{year}_*.csv"))
     for csv_path in asset_files:
         logger.info(f"Processing assets from {csv_path.name}...")
         df_assets = pd.read_csv(csv_path, sep=';', encoding='latin1')
         
-        # We need to map SQ_CANDIDATO to Candidate.id
-        # To ensure we only update assets if this is the newest election:
-        # 1. Find candidates whose ano_ultima_eleicao == year
-        # 2. Delete their old assets
-        # 3. Insert new ones
-        
         with engine.connect() as conn:
-            # Get mapping of SQ -> ID for candidates from THIS year
             res = conn.execute(text('SELECT id, sq_candidato FROM "Candidate" WHERE ano_ultima_eleicao = :year'), {"year": year})
             sq_to_id = {row[1]: row[0] for row in res}
-            
-            # Filter assets for candidates we just updated/inserted
             df_assets['sq_candidato'] = df_assets['SQ_CANDIDATO'].astype(str)
             df_active_assets = df_assets[df_assets['sq_candidato'].isin(sq_to_id.keys())].copy()
             
             if not df_active_assets.empty:
-                # Clear old assets for these candidates
                 candidate_ids = list(sq_to_id.values())
                 conn.execute(text('DELETE FROM "CandidateAsset" WHERE candidate_id IN :ids'), {"ids": tuple(candidate_ids)})
                 
-                # Insert new assets and track total
                 totals = {}
                 for _, row in df_active_assets.iterrows():
                     cid = sq_to_id[row['sq_candidato']]
-                    
-                    # Robust parsing for VR_BEM_CANDIDATO
                     raw_val = str(row['VR_BEM_CANDIDATO'])
                     try:
-                        # TSE format: often uses comma for decimals
                         valor = float(raw_val.replace(',', '.'))
                     except (ValueError, TypeError):
                         valor = 0.0
-                        
                     totals[cid] = totals.get(cid, 0) + valor
                     
                     conn.execute(text("""
@@ -206,13 +187,11 @@ def process_year(year, engine):
                         "valor": valor
                     })
                 
-                # Update Candidate.patrimonio_total with the SUM of assets
                 for cid, total in totals.items():
                     conn.execute(text('UPDATE "Candidate" SET patrimonio_total = :total WHERE id = :id'), {"total": total, "id": cid})
             conn.commit()
 
-    # 3. Process Socials (Similar logic)
-    # Glob for both patterns: rede_social_cand_ and rede_social_candidato_
+    # 3. Process Socials
     social_files = list(EXTRACT_DIR.glob(f"rede_social_cand*_{year}_*.csv"))
     if not social_files:
         social_files = list(EXTRACT_DIR.glob(f"rede_social_candidato_{year}_*.csv"))
@@ -225,10 +204,8 @@ def process_year(year, engine):
             res = conn.execute(text('SELECT id, sq_candidato FROM "Candidate" WHERE ano_ultima_eleicao = :year'), {"year": year})
             sq_to_id = {row[1]: row[0] for row in res}
             
-            # Normalize column names for 2024 vs legacy
             if 'DS_URL' in df_socials.columns:
                 df_socials['url'] = df_socials['DS_URL']
-                # 2024 doesn't have a type column, we infer it from URL
                 def infer_type(url):
                     url = str(url).lower()
                     if 'instagram' in url: return 'INSTAGRAM'
@@ -248,7 +225,6 @@ def process_year(year, engine):
             if not df_active_socials.empty:
                 candidate_ids = list(sq_to_id.values())
                 conn.execute(text('DELETE FROM "CandidateSocial" WHERE candidate_id IN :ids'), {"ids": tuple(candidate_ids)})
-                
                 for _, row in df_active_socials.iterrows():
                     conn.execute(text("""
                         INSERT INTO "CandidateSocial" (id, candidate_id, tipo_rede, url)
@@ -276,7 +252,6 @@ def process_year(year, engine):
         if all_votes:
             df_votes = pd.concat(all_votes)
             df_votes_agg = df_votes.groupby('SQ_CANDIDATO')['QT_VOTOS_NOMINAIS'].sum().reset_index()
-            
             with engine.connect() as conn:
                 for _, row in df_votes_agg.iterrows():
                     conn.execute(text('UPDATE "Candidate" SET total_votos = :votos WHERE sq_candidato = :sq AND ano_ultima_eleicao = :year'), 
@@ -284,7 +259,10 @@ def process_year(year, engine):
                 conn.commit()
 
     # 5. Process Expenses
-    expense_files = list(EXTRACT_DIR.glob(f"despesas_contratadas_candidatos_{year}_*.csv"))
+    expense_files = list(EXTRACT_DIR.glob(f"*despesas_contratadas*candidatos_{year}_*.csv"))
+    if not expense_files:
+        expense_files = list(EXTRACT_DIR.glob(f"despesas_contratadas_candidatos_{year}_*.csv"))
+    
     if expense_files:
         logger.info(f"Processing expenses for {year}...")
         all_expenses = []
@@ -297,10 +275,8 @@ def process_year(year, engine):
             
         if all_expenses:
             df_expenses = pd.concat(all_expenses)
-            # Robust parsing for VR_DESPESA_CONTRATADA
             df_expenses['VR_DESPESA_CONTRATADA'] = df_expenses['VR_DESPESA_CONTRATADA'].astype(str).str.replace(',', '.').astype(float)
             df_expenses_agg = df_expenses.groupby('SQ_CANDIDATO')['VR_DESPESA_CONTRATADA'].sum().reset_index()
-            
             with engine.connect() as conn:
                 for _, row in df_expenses_agg.iterrows():
                     conn.execute(text('UPDATE "Candidate" SET total_despesas = :despesas WHERE sq_candidato = :sq AND ano_ultima_eleicao = :year'), 
@@ -312,8 +288,8 @@ def run_full_sync():
     db_url = os.getenv("DATABASE_URL")
     engine = create_engine(db_url)
     
-    # Years to process in order
-    years = [2018, 2020, 2022, 2024]
+    # Years to process in order (prioritizing most recent)
+    years = [2024, 2022, 2020, 2018]
     categories = ["candidates", "assets", "socials", "votes", "expenses"]
     
     for year in years:
