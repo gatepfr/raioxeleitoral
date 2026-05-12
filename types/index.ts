@@ -25,6 +25,8 @@ export interface Candidate {
   situacao_candidatura: string;
   ano_ultima_eleicao: number;
   patrimonio_total: number;
+  total_votos: number;
+  total_despesas: number;
   assets: Asset[];
   socials: Social[];
   lead?: Lead | null;
