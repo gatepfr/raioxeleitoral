@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { LayoutDashboard, Lock } from "lucide-react";
 
+import Image from "next/image";
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,11 +45,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50/50 dark:bg-zinc-950 p-4">
       <div className="w-full max-w-md space-y-8">
-        <div className="flex flex-col items-center text-center space-y-2">
-          <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
-            <LayoutDashboard className="h-6 w-6" />
+        <div className="flex flex-col items-center text-center space-y-4">
+          <div className="w-64 h-32 relative">
+            <Image 
+              src="/raioxeleitoral.png" 
+              alt="Raio X Eleitoral" 
+              fill 
+              className="object-contain" 
+              priority 
+            />
           </div>
-          <h1 className="text-3xl font-black uppercase tracking-tighter">Raio X Eleitoral</h1>
           <p className="text-muted-foreground font-medium">Munição Comercial de Elite</p>
         </div>
 
