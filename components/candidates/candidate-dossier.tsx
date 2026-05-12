@@ -65,7 +65,7 @@ export function CandidateDossier({
             Dossiê do Candidato
           </DialogTitle>
           <DialogDescription>
-            Informações detalhadas sobre {candidate.nome_completo}
+            Informações detalhadas da eleição de {candidate.ano_ultima_eleicao} para {candidate.nome_completo}
           </DialogDescription>
         </DialogHeader>
 

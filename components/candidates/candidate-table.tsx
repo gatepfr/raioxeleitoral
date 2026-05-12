@@ -98,8 +98,13 @@ export function CandidateTable({
                       />
                     </div>
                     <div className="flex flex-col gap-1.5 min-w-0">
-                      <div className="font-bold text-zinc-900 dark:text-zinc-100 truncate">
-                        {candidate.nome_urna}
+                      <div className="flex items-center gap-2">
+                        <div className="font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                          {candidate.nome_urna}
+                        </div>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
+                          {candidate.ano_ultima_eleicao}
+                        </span>
                       </div>
                       <div className="text-xs text-zinc-500 uppercase tracking-tight font-medium truncate">
                         {candidate.partido}
