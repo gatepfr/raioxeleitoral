@@ -42,7 +42,9 @@ export function CandidateDossier({
     if (cand.ano_ultima_eleicao === 2020) electionId = "2030402020";
     if (cand.ano_ultima_eleicao === 2018) electionId = "20180001";
     
-    return `https://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/${electionId}/${cand.sq_candidato}/${electionId}`;
+    // Using the correct TSE architecture format provided by the user
+    // Format: .../img/{electionId}/{sq_candidato}/{ue_id}
+    return `https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/${electionId}/${cand.sq_candidato}/${cand.ue_id}`;
   };
 
   const totalAssets = candidate.assets?.reduce((acc, asset) => acc + asset.valor, 0) ?? 0
@@ -97,9 +99,9 @@ export function CandidateDossier({
 
               <div className="flex flex-wrap gap-x-12 gap-y-6 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                 <div>
-                  <p className="text-xs font-bold uppercase text-zinc-400 tracking-wider mb-1">CPF / TSE ID</p>
+                  <p className="text-xs font-bold uppercase text-zinc-400 tracking-wider mb-1">TSE ID</p>
                   <p className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
-                    {candidate.cpf} <span className="text-zinc-300 mx-1">|</span> {candidate.sq_candidato}
+                    {candidate.sq_candidato}
                   </p>
                 </div>
                 <div>

@@ -12,13 +12,14 @@ model Candidate {
   sq_candidato         String
   nome_completo        String
   nome_urna            String
-  cpf                  String
+  cpf                  String?
   titulo_eleitor       String            @unique
   email_tse            String?
   partido              String
   cargo                String
   uf                   String
   municipio            String
+  ue_id                String?
   situacao_candidatura String
   updatedAt            DateTime          @updatedAt
   ano_ultima_eleicao   Int               @default(2024)

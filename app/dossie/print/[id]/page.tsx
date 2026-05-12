@@ -36,7 +36,9 @@ export default async function DossiePrintPage({
     if (cand.ano_ultima_eleicao === 2020) electionId = "2030402020";
     if (cand.ano_ultima_eleicao === 2018) electionId = "20180001";
     
-    return `https://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/${electionId}/${cand.sq_candidato}/${electionId}`;
+    // Using the correct TSE architecture format provided by the user
+    // Format: .../img/{electionId}/{sq_candidato}/{ue_id}
+    return `https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/${electionId}/${cand.sq_candidato}/${cand.ue_id}`;
   };
 
   const totalAssets = candidate.assets?.reduce((acc, asset) => acc + asset.valor, 0) ?? 0;
@@ -98,10 +100,6 @@ export default async function DossiePrintPage({
                 <div>
                   <span className="text-xs font-bold text-zinc-400 uppercase block">Nome de Urna</span>
                   <span className="text-lg font-black text-primary uppercase">{candidate.nome_urna}</span>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-zinc-400 uppercase block">CPF</span>
-                  <span className="text-lg font-semibold text-zinc-700">{candidate.cpf}</span>
                 </div>
                 <div>
                   <span className="text-xs font-bold text-zinc-400 uppercase block">ID TSE</span>
