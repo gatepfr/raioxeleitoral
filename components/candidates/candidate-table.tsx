@@ -13,6 +13,7 @@ import { Candidate } from "@/types";
 import Link from "next/link";
 
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import Image from "next/image";
 
 interface CandidateTableProps {
   candidates: Candidate[];
@@ -31,6 +32,15 @@ export function CandidateTable({
   sortOrder,
   onSort
 }: CandidateTableProps) {
+  const getPhotoUrl = (cand: Candidate) => {
+    let electionId = "2045202024"; // Default 2024
+    if (cand.ano_ultima_eleicao === 2022) electionId = "20220001";
+    if (cand.ano_ultima_eleicao === 2020) electionId = "2030402020";
+    if (cand.ano_ultima_eleicao === 2018) electionId = "20180001";
+    
+    return `https://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/${electionId}/${cand.sq_candidato}/${electionId}`;
+  };
+
   const renderSortIcon = (field: string) => {
     if (sortBy !== field) return <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />;
     return sortOrder === "asc" ? (
@@ -77,14 +87,24 @@ export function CandidateTable({
             candidates.map((candidate) => (
               <TableRow key={candidate.id} className="group hover:bg-zinc-50/50">
                 <TableCell className="py-4">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="font-bold text-zinc-900 dark:text-zinc-100">
-                      {candidate.nome_urna}
+                  <div className="flex items-start gap-4">
+                    <div className="h-12 w-12 relative rounded-full overflow-hidden border-2 border-muted bg-muted flex-shrink-0 mt-0.5 shadow-sm">
+                      <Image 
+                        src={getPhotoUrl(candidate)} 
+                        alt={candidate.nome_urna}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
                     </div>
-                    <div className="text-xs text-zinc-500 uppercase tracking-tight font-medium">
-                      {candidate.partido}
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-1.5 min-w-0">
+                      <div className="font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                        {candidate.nome_urna}
+                      </div>
+                      <div className="text-xs text-zinc-500 uppercase tracking-tight font-medium truncate">
+                        {candidate.partido}
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-2">
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
                         Bens: {new Intl.NumberFormat("pt-BR", {
                           style: "currency",

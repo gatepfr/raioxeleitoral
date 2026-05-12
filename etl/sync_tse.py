@@ -34,7 +34,7 @@ def download_tse_data(year, category):
     # 2024 and 2022 use different paths for socials
     social_url = f"{base_url}/consulta_cand/rede_social_candidato_{year}.zip"
     
-    # Expense URL pattern is different and lives in /prestacao_contas/
+    # PC pattern for 2018-2024
     expense_url = f"{base_url}/prestacao_contas/prestacao_de_contas_eleitorais_candidatos_{year}.zip"
     
     urls = {
@@ -52,12 +52,15 @@ def download_tse_data(year, category):
     target_path = DATA_DIR / f"{category}_{year}.zip"
     
     if target_path.exists():
-        logger.info(f"File {target_path} already exists, skipping download.")
-        return target_path
+        # Check if file is small (failed download)
+        if target_path.stat().st_size > 1024:
+            logger.info(f"File {target_path} already exists, skipping download.")
+            return target_path
 
     logger.info(f"Downloading {url}...")
+    headers = {'User-Agent': 'Mozilla/5.0'}
     try:
-        response = requests.get(url, stream=True, timeout=(5, 30))
+        response = requests.get(url, stream=True, timeout=(5, 30), headers=headers)
         response.raise_for_status()
         with open(target_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
@@ -81,7 +84,7 @@ def extract_zip(zip_path, extract_to):
         logger.error(f"Failed to extract {zip_path}: {e}")
 
 def process_year(year, engine):
-    """Process all files for a specific election year."""
+    """Process all files for a specific election year with high performance logic."""
     logger.info(f"--- Processing Election Year: {year} ---")
     
     # 1. Process Candidates
@@ -90,7 +93,6 @@ def process_year(year, engine):
         logger.warning(f"No candidate files for {year}")
         return
 
-    # Mapping from TSE CSV to Prisma Schema
     mapping = {
         'SQ_CANDIDATO': 'sq_candidato',
         'NM_CANDIDATO': 'nome_completo',
@@ -108,7 +110,6 @@ def process_year(year, engine):
     for csv_path in cand_files:
         logger.info(f"Consolidating candidates from {csv_path.name}...")
         df = pd.read_csv(csv_path, sep=';', encoding='latin1')
-        
         available_cols = [col for col in mapping.keys() if col in df.columns]
         actual_mapping = {col: mapping[col] for col in available_cols}
         df_filtered = df[available_cols].rename(columns=actual_mapping)
@@ -237,51 +238,80 @@ def process_year(year, engine):
                     })
             conn.commit()
 
-    # 4. Process Votes
+    # 4. Process Votes (BULK OPTIMIZED)
     vote_files = list(EXTRACT_DIR.glob(f"votacao_candidato_munzona_{year}_*.csv"))
     if vote_files:
-        logger.info(f"Processing votes for {year}...")
+        logger.info(f"--- STARTING BULK VOTE AGGREGATION FOR {year} ---")
         all_votes = []
         for csv_path in vote_files:
             try:
                 df_v = pd.read_csv(csv_path, sep=';', encoding='latin1', usecols=['SQ_CANDIDATO', 'QT_VOTOS_NOMINAIS'])
                 all_votes.append(df_v)
+                logger.info(f"  Loaded votes: {csv_path.name}")
             except Exception as e:
                 logger.warning(f"Could not process vote file {csv_path.name}: {e}")
         
         if all_votes:
+            logger.info("  Consolidating all states...")
             df_votes = pd.concat(all_votes)
             df_votes_agg = df_votes.groupby('SQ_CANDIDATO')['QT_VOTOS_NOMINAIS'].sum().reset_index()
+            
+            logger.info(f"  Injecting {len(df_votes_agg)} vote counts into database...")
+            # TEMPORARY TABLE APPROACH FOR BULK UPDATE
             with engine.connect() as conn:
-                for _, row in df_votes_agg.iterrows():
-                    conn.execute(text('UPDATE "Candidate" SET total_votos = :votos WHERE sq_candidato = :sq AND ano_ultima_eleicao = :year'), 
-                                 {"votos": int(row['QT_VOTOS_NOMINAIS']), "sq": str(row['SQ_CANDIDATO']), "year": year})
+                conn.execute(text("CREATE TEMPORARY TABLE temp_votes (sq TEXT, votes INTEGER)"))
+                # Convert to dict for fast insertion
+                data = [{"sq": str(r['SQ_CANDIDATO']), "votes": int(r['QT_VOTOS_NOMINAIS'])} for _, r in df_votes_agg.iterrows()]
+                conn.execute(text("INSERT INTO temp_votes (sq, votes) VALUES (:sq, :votes)"), data)
+                
+                # Performance-critical mass update
+                conn.execute(text("""
+                    UPDATE "Candidate" 
+                    SET total_votos = temp_votes.votes 
+                    FROM temp_votes 
+                    WHERE "Candidate".sq_candidato = temp_votes.sq 
+                    AND "Candidate".ano_ultima_eleicao = :year
+                """), {"year": year})
                 conn.commit()
+            logger.info(f"--- COMPLETED BULK VOTE INJECTION FOR {year} ---")
 
-    # 5. Process Expenses
+    # 5. Process Expenses (BULK OPTIMIZED)
     expense_files = list(EXTRACT_DIR.glob(f"*despesas_contratadas*candidatos_{year}_*.csv"))
     if not expense_files:
         expense_files = list(EXTRACT_DIR.glob(f"despesas_contratadas_candidatos_{year}_*.csv"))
     
     if expense_files:
-        logger.info(f"Processing expenses for {year}...")
+        logger.info(f"--- STARTING BULK EXPENSE AGGREGATION FOR {year} ---")
         all_expenses = []
         for csv_path in expense_files:
             try:
                 df_e = pd.read_csv(csv_path, sep=';', encoding='latin1', usecols=['SQ_CANDIDATO', 'VR_DESPESA_CONTRATADA'])
                 all_expenses.append(df_e)
+                logger.info(f"  Loaded expenses: {csv_path.name}")
             except Exception as e:
                 logger.warning(f"Could not process expense file {csv_path.name}: {e}")
             
         if all_expenses:
+            logger.info("  Consolidating all states...")
             df_expenses = pd.concat(all_expenses)
             df_expenses['VR_DESPESA_CONTRATADA'] = df_expenses['VR_DESPESA_CONTRATADA'].astype(str).str.replace(',', '.').astype(float)
             df_expenses_agg = df_expenses.groupby('SQ_CANDIDATO')['VR_DESPESA_CONTRATADA'].sum().reset_index()
+            
+            logger.info(f"  Injecting {len(df_expenses_agg)} expense totals into database...")
             with engine.connect() as conn:
-                for _, row in df_expenses_agg.iterrows():
-                    conn.execute(text('UPDATE "Candidate" SET total_despesas = :despesas WHERE sq_candidato = :sq AND ano_ultima_eleicao = :year'), 
-                                 {"despesas": float(row['VR_DESPESA_CONTRATADA']), "sq": str(row['SQ_CANDIDATO']), "year": year})
+                conn.execute(text("CREATE TEMPORARY TABLE temp_expenses (sq TEXT, val FLOAT)"))
+                data = [{"sq": str(r['SQ_CANDIDATO']), "val": float(r['VR_DESPESA_CONTRATADA'])} for _, r in df_expenses_agg.iterrows()]
+                conn.execute(text("INSERT INTO temp_expenses (sq, val) VALUES (:sq, :val)"), data)
+                
+                conn.execute(text("""
+                    UPDATE "Candidate" 
+                    SET total_despesas = temp_expenses.val 
+                    FROM temp_expenses 
+                    WHERE "Candidate".sq_candidato = temp_expenses.sq 
+                    AND "Candidate".ano_ultima_eleicao = :year
+                """), {"year": year})
                 conn.commit()
+            logger.info(f"--- COMPLETED BULK EXPENSE INJECTION FOR {year} ---")
 
 def run_full_sync():
     setup_directories()

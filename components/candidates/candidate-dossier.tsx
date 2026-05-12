@@ -19,6 +19,7 @@ import {
 import { User, Wallet, Share2, ExternalLink, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import Image from "next/image"
 
 interface CandidateDossierProps {
   candidate: Candidate | null
@@ -34,6 +35,15 @@ export function CandidateDossier({
   onCaptureLead,
 }: CandidateDossierProps) {
   if (!candidate) return null
+
+  const getPhotoUrl = (cand: Candidate) => {
+    let electionId = "2045202024"; // Default 2024
+    if (cand.ano_ultima_eleicao === 2022) electionId = "20220001";
+    if (cand.ano_ultima_eleicao === 2020) electionId = "2030402020";
+    if (cand.ano_ultima_eleicao === 2018) electionId = "20180001";
+    
+    return `https://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/${electionId}/${cand.sq_candidato}/${electionId}`;
+  };
 
   const totalAssets = candidate.assets?.reduce((acc, asset) => acc + asset.valor, 0) ?? 0
 
@@ -58,15 +68,49 @@ export function CandidateDossier({
         </DialogHeader>
 
         <div className="grid gap-6 py-4">
-          {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Nome Completo</p>
-              <p className="text-lg font-semibold">{candidate.nome_completo}</p>
+          {/* Basic Info with Photo */}
+          <div className="flex flex-col md:flex-row gap-6 items-start">
+            <div className="w-full md:w-48 h-64 relative rounded-xl overflow-hidden border-4 border-white shadow-xl bg-muted flex-shrink-0">
+              <Image 
+                src={getPhotoUrl(candidate)} 
+                alt={candidate.nome_urna}
+                fill
+                className="object-cover"
+                unoptimized // TSE images can be slow to optimize on the fly
+              />
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">CPF</p>
-              <p className="text-lg font-semibold">{candidate.cpf}</p>
+            <div className="grid grid-cols-1 gap-4 flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div className="space-y-1">
+                  <p className="text-sm font-bold uppercase text-zinc-400 tracking-wider">Nome Completo</p>
+                  <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+                    {candidate.nome_completo}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold uppercase text-zinc-400 tracking-wider">Nome de Urna</p>
+                  <p className="text-lg font-black text-primary uppercase">
+                    {candidate.nome_urna}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold uppercase text-zinc-400 tracking-wider">CPF / TSE ID</p>
+                  <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
+                    {candidate.cpf} <span className="text-zinc-300 mx-1">|</span> {candidate.sq_candidato}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold uppercase text-zinc-400 tracking-wider">Cargo e Partido</p>
+                  <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">
+                    {candidate.cargo} — <span className="text-primary">{candidate.partido}</span>
+                  </p>
+                </div>
+              </div>
+              
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-900 border rounded-lg">
+                 <p className="text-xs font-bold uppercase text-zinc-400 mb-1">Localidade</p>
+                 <p className="text-sm font-medium">{candidate.municipio} - {candidate.uf}</p>
+              </div>
             </div>
           </div>
 
@@ -84,13 +128,13 @@ export function CandidateDossier({
             </div>
 
             {candidate.assets && candidate.assets.length > 0 ? (
-              <div className="border rounded-md">
+              <div className="border rounded-md overflow-hidden">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="bg-zinc-50 dark:bg-zinc-900">
                     <TableRow>
-                      <TableHead>Tipo de Bem</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead className="text-right">Valor</TableHead>
+                      <TableHead className="font-bold">Tipo de Bem</TableHead>
+                      <TableHead className="font-bold">Descrição</TableHead>
+                      <TableHead className="text-right font-bold">Valor</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
