@@ -29,6 +29,15 @@ model Candidate {
   socials              CandidateSocial[]
 }
 
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model CandidateAsset {
   id           String    @id @default(uuid())
   candidate_id String

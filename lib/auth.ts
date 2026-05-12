@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { db } from "@/lib/db";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -10,13 +11,18 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Senha", type: "password" }
       },
       async authorize(credentials) {
-        // Simple static check for the agency
-        // In production, this should check the database
-        if (credentials?.email === "admin@iceberg.com" && credentials?.password === "admin123") {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const user = await db.user.findUnique({
+          where: { email: credentials.email }
+        });
+
+        // Verificação simples de senha (em produção recomenda-se bcrypt)
+        if (user && user.password === credentials.password) {
           return {
-            id: "1",
-            name: "Vendedor Admin",
-            email: "admin@iceberg.com",
+            id: user.id,
+            name: user.name,
+            email: user.email,
           };
         }
         return null;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserPlus, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, UserPlus, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
@@ -19,6 +19,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     { name: "Prospecção TSE", href: "/", icon: UserPlus },
     { name: "Meus Candidatos", href: "/my-candidates", icon: Users },
     { name: "Quadro de Vendas", href: "/crm", icon: LayoutDashboard },
+    { name: "Configurações", href: "/settings", icon: Settings },
   ];
 
   return (
