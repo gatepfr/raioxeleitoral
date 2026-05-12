@@ -99,11 +99,9 @@ def run_import():
         
     engine = create_engine(db_url)
     
-    # Processa 2024 primeiro (prioridade)
-    import_expenses_for_year(2024, engine)
-    
-    # Depois 2022
-    import_expenses_for_year(2022, engine)
+    # Processa todos os anos na sequência
+    for year in [2024, 2022, 2020, 2018]:
+        import_expenses_for_year(year, engine)
 
 if __name__ == "__main__":
     run_import()

@@ -97,8 +97,9 @@ def run_fix():
     db_url = os.getenv("DATABASE_URL")
     engine = create_engine(db_url)
     
-    fix_votes_for_year(2024, engine)
-    fix_votes_for_year(2022, engine)
+    # Processa todos os anos para garantir que os votos estejam 100% corretos
+    for year in [2024, 2022, 2020, 2018]:
+        fix_votes_for_year(year, engine)
 
 if __name__ == "__main__":
     run_fix()
