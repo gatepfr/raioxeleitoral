@@ -105,27 +105,28 @@ export function CandidateTable({
                         {candidate.partido}
                       </div>
                       <div className="mt-1 flex flex-wrap gap-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
-                        Bens: {new Intl.NumberFormat("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                          maximumFractionDigits: 0,
-                        }).format(candidate.patrimonio_total)}
-                      </span>
-                      {candidate.total_votos > 0 && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
-                          🗳️ {candidate.total_votos.toLocaleString()} votos
-                        </span>
-                      )}
-                      {candidate.total_despesas > 0 && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-pink-50 text-pink-700 border border-pink-100 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-800">
-                          💸 Gasto: {new Intl.NumberFormat("pt-BR", {
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
+                          Bens: {new Intl.NumberFormat("pt-BR", {
                             style: "currency",
                             currency: "BRL",
                             maximumFractionDigits: 0,
-                          }).format(candidate.total_despesas)}
+                          }).format(candidate.patrimonio_total)}
                         </span>
-                      )}
+                        {candidate.total_votos > 0 && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800">
+                            🗳️ {candidate.total_votos.toLocaleString()} votos
+                          </span>
+                        )}
+                        {candidate.total_despesas > 0 && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-pink-50 text-pink-700 border border-pink-100 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-800">
+                            💸 Gasto: {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                              maximumFractionDigits: 0,
+                            }).format(candidate.total_despesas)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </TableCell>
