@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserPlus, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, Users, UserPlus, LogOut, Settings, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { useState } from "react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -23,22 +25,40 @@ export function MainLayout({ children }: MainLayoutProps) {
   ];
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background overflow-hidden">
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
-        <div className="p-4 flex justify-start">
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col transition-transform duration-300 lg:relative lg:translate-x-0",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="p-4 flex items-center justify-between lg:justify-start">
           <div className="w-48 h-20 relative">
              <Image src="/raioxeleitoral.png" alt="Raio X Eleitoral Logo" fill className="object-contain object-left" priority />
           </div>
+          <button 
+            className="lg:hidden p-2 text-sidebar-foreground/80 hover:text-white"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <X className="h-6 w-6" />
+          </button>
         </div>
         
-        <nav className="flex-1 px-4 space-y-2 mt-4">
+        <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
                   isActive
@@ -65,11 +85,26 @@ export function MainLayout({ children }: MainLayoutProps) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
-        <div className="py-8 px-8">
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Mobile Header */}
+        <header className="flex items-center justify-between p-4 border-b bg-white dark:bg-zinc-950 lg:hidden">
+          <div className="w-32 h-10 relative">
+            <Image src="/raioxeleitoral.png" alt="Logo" fill className="object-contain object-left" />
+          </div>
+          <button 
+            className="p-2 text-muted-foreground hover:bg-zinc-100 rounded-md"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        </header>
+
+        <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 lg:p-8">
+          <div className="max-w-full">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
