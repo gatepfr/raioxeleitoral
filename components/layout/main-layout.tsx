@@ -26,11 +26,10 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-10 h-10 relative">
-             <Image src="/raioxeleitoral.png" alt="Raio X Eleitoral Logo" fill className="object-contain" />
+        <div className="p-4 flex justify-start">
+          <div className="w-48 h-20 relative">
+             <Image src="/raioxeleitoral.png" alt="Raio X Eleitoral Logo" fill className="object-contain object-left" priority />
           </div>
-          <span className="font-bold text-xl tracking-tight text-white">Raio X Eleitoral</span>
         </div>
         
         <nav className="flex-1 px-4 space-y-2 mt-4">
