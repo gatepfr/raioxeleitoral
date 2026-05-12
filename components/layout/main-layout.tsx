@@ -50,13 +50,6 @@ export function MainLayout({ children }: MainLayoutProps) {
             <X className="h-6 w-6" />
           </button>
         </div>
-
-            className="lg:hidden p-2 text-sidebar-foreground/80 hover:text-white"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
         
         <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto">
           {navigation.map((item) => {
