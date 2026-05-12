@@ -16,7 +16,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Prospecção TSE", href: "/", icon: UserPlus },
+    { name: "Candidatos Brasil", href: "/", icon: UserPlus },
     { name: "Meus Candidatos", href: "/my-candidates", icon: Users },
     { name: "Quadro de Vendas", href: "/crm", icon: LayoutDashboard },
     { name: "Configurações", href: "/settings", icon: Settings },
@@ -67,7 +67,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
-        <div className="container mx-auto py-8 px-8">
+        <div className="py-8 px-8">
           {children}
         </div>
       </main>
