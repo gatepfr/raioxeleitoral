@@ -56,10 +56,10 @@ export function CandidateDossier({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
-            <User className="h-6 w-6" />
+            <User className="h-6 w-6 text-primary" />
             Dossiê do Candidato
           </DialogTitle>
           <DialogDescription>
@@ -67,49 +67,51 @@ export function CandidateDossier({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-6 py-4">
+        <div className="grid gap-8 py-4">
           {/* Basic Info with Photo */}
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="w-full md:w-48 h-64 relative rounded-xl overflow-hidden border-4 border-white shadow-xl bg-muted flex-shrink-0">
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            <div className="w-full md:w-56 h-72 relative rounded-xl overflow-hidden border-4 border-white shadow-xl bg-muted flex-shrink-0">
               <Image 
                 src={getPhotoUrl(candidate)} 
                 alt={candidate.nome_urna}
                 fill
                 className="object-cover"
-                unoptimized // TSE images can be slow to optimize on the fly
+                unoptimized
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                <div className="space-y-1">
-                  <p className="text-sm font-bold uppercase text-zinc-400 tracking-wider">Nome Completo</p>
-                  <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+            <div className="flex-1 space-y-6 w-full">
+              <div className="flex flex-wrap gap-x-12 gap-y-6">
+                <div className="min-w-[240px] flex-1">
+                  <p className="text-xs font-bold uppercase text-zinc-400 tracking-wider mb-1">Nome Completo</p>
+                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
                     {candidate.nome_completo}
                   </p>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-bold uppercase text-zinc-400 tracking-wider">Nome de Urna</p>
-                  <p className="text-lg font-black text-primary uppercase">
+                <div className="min-w-[200px]">
+                  <p className="text-xs font-bold uppercase text-zinc-400 tracking-wider mb-1">Nome de Urna</p>
+                  <p className="text-2xl font-black text-primary uppercase leading-none">
                     {candidate.nome_urna}
                   </p>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-bold uppercase text-zinc-400 tracking-wider">CPF / TSE ID</p>
-                  <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
+              </div>
+
+              <div className="flex flex-wrap gap-x-12 gap-y-6 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <div>
+                  <p className="text-xs font-bold uppercase text-zinc-400 tracking-wider mb-1">CPF / TSE ID</p>
+                  <p className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
                     {candidate.cpf} <span className="text-zinc-300 mx-1">|</span> {candidate.sq_candidato}
                   </p>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-bold uppercase text-zinc-400 tracking-wider">Cargo e Partido</p>
+                <div>
+                  <p className="text-xs font-bold uppercase text-zinc-400 tracking-wider mb-1">Partido / Cargo</p>
                   <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">
-                    {candidate.cargo} — <span className="text-primary">{candidate.partido}</span>
+                    <span className="text-primary">{candidate.partido}</span> — {candidate.cargo}
                   </p>
                 </div>
-              </div>
-              
-              <div className="p-3 bg-zinc-50 dark:bg-zinc-900 border rounded-lg">
-                 <p className="text-xs font-bold uppercase text-zinc-400 mb-1">Localidade</p>
-                 <p className="text-sm font-medium">{candidate.municipio} - {candidate.uf}</p>
+                <div>
+                   <p className="text-xs font-bold uppercase text-zinc-400 mb-1">Localidade</p>
+                   <p className="text-base font-medium">{candidate.municipio} - {candidate.uf}</p>
+                </div>
               </div>
             </div>
           </div>
