@@ -11,21 +11,39 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Senha", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        console.log("--- Tentativa de Login ---");
+        console.log("E-mail digitado:", credentials?.email);
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email }
-        });
-
-        // Verificação simples de senha (em produção recomenda-se bcrypt)
-        if (user && user.password === credentials.password) {
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-          };
+        if (!credentials?.email || !credentials?.password) {
+          console.log("Erro: E-mail ou senha não fornecidos.");
+          return null;
         }
-        return null;
+
+        try {
+          const user = await db.user.findUnique({
+            where: { email: credentials.email.toLowerCase().trim() }
+          });
+
+          if (!user) {
+            console.log("Erro: Usuário não encontrado no banco de dados.");
+            return null;
+          }
+
+          if (user.password === credentials.password) {
+            console.log("Sucesso: Login autorizado para", user.email);
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+            };
+          }
+
+          console.log("Erro: Senha incorreta para o usuário", user.email);
+          return null;
+        } catch (error: any) {
+          console.error("ERRO CRÍTICO NO BANCO DE DADOS:", error.message);
+          return null;
+        }
       }
     })
   ],
