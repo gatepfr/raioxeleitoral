@@ -117,7 +117,7 @@ export default function Home() {
             Prospecção de Candidatos
           </h1>
           <p className="text-base text-zinc-500 dark:text-zinc-400">
-            Explore e analise candidatos das eleições municipais de 2024.
+            Explore e analise candidatos.
           </p>
         </div>
 
