@@ -58,7 +58,7 @@ export function CandidateDossier({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <User className="h-6 w-6 text-primary" />
@@ -69,9 +69,9 @@ export function CandidateDossier({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-10 py-4">
+        <div className="grid gap-10 py-4 max-w-full">
           {/* Basic Info with Photo */}
-          <div className="flex flex-col md:flex-row gap-8 items-start">
+          <div className="flex flex-col md:flex-row gap-8 items-start max-w-full">
             <div className="w-full md:w-56 h-72 relative rounded-xl overflow-hidden border-4 border-white shadow-xl bg-muted flex-shrink-0">
               <Image 
                 src={getPhotoUrl(candidate)} 
@@ -81,17 +81,17 @@ export function CandidateDossier({
                 unoptimized
               />
             </div>
-            <div className="flex-1 space-y-6 w-full">
+            <div className="flex-1 space-y-6 w-full min-w-0">
               <div className="flex flex-wrap gap-x-12 gap-y-6">
-                <div className="min-w-[240px] flex-1">
+                <div className="min-w-[200px] flex-1">
                   <p className="text-xs font-bold uppercase text-zinc-400 tracking-wider mb-1">Nome Completo</p>
-                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight break-words">
                     {candidate.nome_completo}
                   </p>
                 </div>
                 <div className="min-w-[200px]">
                   <p className="text-xs font-bold uppercase text-zinc-400 tracking-wider mb-1">Nome de Urna</p>
-                  <p className="text-2xl font-black text-primary uppercase leading-none">
+                  <p className="text-2xl font-black text-primary uppercase leading-none break-words">
                     {candidate.nome_urna}
                   </p>
                 </div>
@@ -119,7 +119,7 @@ export function CandidateDossier({
           </div>
 
           {/* Assets Summary */}
-          <div className="space-y-4">
+          <div className="space-y-4 max-w-full">
             <div className="flex items-center gap-2 border-b pb-2">
               <Wallet className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">Patrimônio Declarado</h3>
@@ -132,23 +132,23 @@ export function CandidateDossier({
             </div>
 
             {candidate.assets && candidate.assets.length > 0 ? (
-              <div className="border rounded-xl overflow-hidden shadow-sm">
+              <div className="border rounded-xl overflow-hidden shadow-sm max-w-full">
                 <Table>
                   <TableHeader className="bg-zinc-50 dark:bg-zinc-900">
                     <TableRow>
-                      <TableHead className="font-bold w-[200px]">Tipo de Bem</TableHead>
+                      <TableHead className="font-bold w-[30%]">Tipo de Bem</TableHead>
                       <TableHead className="font-bold">Descrição</TableHead>
-                      <TableHead className="text-right font-bold w-[140px]">Valor</TableHead>
+                      <TableHead className="text-right font-bold w-[120px]">Valor</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {candidate.assets.map((asset) => (
                       <TableRow key={asset.id} className="hover:bg-zinc-50/50">
-                        <TableCell className="font-medium align-top">{asset.tipo_bem}</TableCell>
+                        <TableCell className="font-medium align-top break-words">{asset.tipo_bem}</TableCell>
                         <TableCell className="whitespace-normal break-words py-3 leading-relaxed">
                           {asset.descricao}
                         </TableCell>
-                        <TableCell className="text-right font-semibold align-top">
+                        <TableCell className="text-right font-semibold align-top whitespace-nowrap">
                           {formatCurrency(asset.valor)}
                         </TableCell>
                       </TableRow>
