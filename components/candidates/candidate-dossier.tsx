@@ -67,7 +67,7 @@ export function CandidateDossier({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-8 py-4">
+        <div className="grid gap-10 py-4">
           {/* Basic Info with Photo */}
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <div className="w-full md:w-56 h-72 relative rounded-xl overflow-hidden border-4 border-white shadow-xl bg-muted flex-shrink-0">
@@ -220,7 +220,7 @@ export function CandidateDossier({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-wrap justify-end gap-3 pt-6 border-t mt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Fechar
             </Button>
