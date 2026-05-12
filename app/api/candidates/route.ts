@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const municipio = searchParams.get("municipio")
     const cargo = searchParams.get("cargo")
     const partido = searchParams.get("partido")
+    const nomeUrna = searchParams.get("nomeUrna")
     const minPatrimonioStr = searchParams.get("minPatrimonio")
     const maxPatrimonioStr = searchParams.get("maxPatrimonio")
 
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
       ...(municipio && { municipio: { equals: municipio, mode: 'insensitive' } }),
       ...(cargo && { cargo: { contains: cargo, mode: 'insensitive' } }),
       ...(partido && { partido: { equals: partido, mode: 'insensitive' } }),
+      ...(nomeUrna && { nome_urna: { contains: nomeUrna, mode: 'insensitive' } }),
       ...((minPatrimonio !== null || maxPatrimonio !== null) && {
         patrimonio_total: {
           ...(minPatrimonio !== null && { gte: minPatrimonio }),
