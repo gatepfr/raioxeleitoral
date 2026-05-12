@@ -130,23 +130,23 @@ export function CandidateDossier({
             </div>
 
             {candidate.assets && candidate.assets.length > 0 ? (
-              <div className="border rounded-md overflow-hidden">
+              <div className="border rounded-xl overflow-hidden shadow-sm">
                 <Table>
                   <TableHeader className="bg-zinc-50 dark:bg-zinc-900">
                     <TableRow>
-                      <TableHead className="font-bold">Tipo de Bem</TableHead>
+                      <TableHead className="font-bold w-[200px]">Tipo de Bem</TableHead>
                       <TableHead className="font-bold">Descrição</TableHead>
-                      <TableHead className="text-right font-bold">Valor</TableHead>
+                      <TableHead className="text-right font-bold w-[140px]">Valor</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {candidate.assets.map((asset) => (
-                      <TableRow key={asset.id}>
-                        <TableCell className="font-medium">{asset.tipo_bem}</TableCell>
-                        <TableCell className="max-w-xs truncate">
+                      <TableRow key={asset.id} className="hover:bg-zinc-50/50">
+                        <TableCell className="font-medium align-top">{asset.tipo_bem}</TableCell>
+                        <TableCell className="whitespace-normal break-words py-3 leading-relaxed">
                           {asset.descricao}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right font-semibold align-top">
                           {formatCurrency(asset.valor)}
                         </TableCell>
                       </TableRow>
@@ -167,22 +167,22 @@ export function CandidateDossier({
               <FileText className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold">Desempenho Eleitoral ({candidate.ano_ultima_eleicao})</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
-                <p className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">Total de Votos</p>
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-xl border border-blue-100 dark:border-blue-800">
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2">Total de Votos</p>
+                <p className="text-3xl font-black text-blue-800 dark:text-blue-300">
                   {candidate.total_votos?.toLocaleString() ?? 0}
                 </p>
               </div>
-              <div className="bg-pink-50 dark:bg-pink-900/20 p-4 rounded-lg border border-pink-100 dark:border-pink-800">
-                <p className="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400 mb-1">Total Gasto</p>
-                <p className="text-2xl font-bold text-pink-700 dark:text-pink-300">
+              <div className="bg-pink-50 dark:bg-pink-900/20 p-5 rounded-xl border border-pink-100 dark:border-pink-800">
+                <p className="text-[10px] font-black uppercase tracking-widest text-pink-600 dark:text-pink-400 mb-2">Total Gasto</p>
+                <p className="text-3xl font-black text-pink-800 dark:text-pink-300">
                   {formatCurrency(candidate.total_despesas ?? 0)}
                 </p>
               </div>
-              <div className="bg-zinc-50 dark:bg-zinc-900/20 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
-                <p className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1">Custo por Voto</p>
-                <p className="text-2xl font-bold text-zinc-700 dark:text-zinc-300">
+              <div className="bg-zinc-50 dark:bg-zinc-900/20 p-5 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400 mb-2">Custo por Voto</p>
+                <p className="text-3xl font-black text-zinc-800 dark:text-zinc-300">
                   {candidate.total_votos > 0 
                     ? formatCurrency((candidate.total_despesas ?? 0) / candidate.total_votos)
                     : "R$ 0,00"}
