@@ -16,7 +16,8 @@ export interface Candidate {
   sq_candidato: string;
   nome_completo: string;
   nome_urna: string;
-  cpf: string;
+  cpf: string | null;
+  ue_id: string | null;
   email_tse: string | null;
   partido: string;
   cargo: string;
