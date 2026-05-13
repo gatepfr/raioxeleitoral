@@ -10,8 +10,7 @@ ENV NEXT_TURBO=0
 ENV NEXT_PRIVATE_LOCAL_TURBO=0
 ENV GENERATE_SOURCEMAP=false
 ENV NEXT_TELEMETRY_DISABLED=1
-# Reduzindo para 1GB para caber em servidores menores
-ENV NODE_OPTIONS="--max-old-space-size=1024"
+ENV NODE_OPTIONS="--max-old-space-size=512"
 
 RUN npm run build
 
@@ -19,6 +18,7 @@ RUN npm run build
 FROM node:20-bullseye-slim AS runner
 WORKDIR /app
 
+# apt instalado aqui (separado do builder para não competir por RAM)
 RUN apt-get update && apt-get install -y \
     openssl \
     ca-certificates \
