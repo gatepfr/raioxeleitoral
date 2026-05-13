@@ -11,6 +11,14 @@ RUN NODE_OPTIONS="--max-old-space-size=3072" npm run build
 # Stage 2: Run
 FROM node:20-slim AS runner
 WORKDIR /app
+
+# Instala dependências do sistema necessárias para o Prisma e SSL
+RUN apt-get update && apt-get install -y \
+    openssl \
+    libssl-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=production
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/public ./public
