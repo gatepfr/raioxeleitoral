@@ -39,9 +39,15 @@ export function MainLayout({ children }: MainLayoutProps) {
         "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col transition-transform duration-300 lg:relative lg:translate-x-0",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-4 pt-6 flex items-center justify-between lg:justify-start">
-          <div className="w-full h-28 relative">
-             <Image src="/raioxeleitoral.png" alt="Raio X Eleitoral Logo" fill className="object-contain object-left" priority />
+        <div className="p-4 pt-8 flex items-center justify-center lg:justify-start">
+          <div className="w-full h-40 relative px-2">
+             <Image 
+               src="/raioxeleitoral.png" 
+               alt="Raio X Eleitoral Logo" 
+               fill 
+               className="object-contain object-center lg:object-left" 
+               priority 
+             />
           </div>
           <button 
             className="lg:hidden p-2 text-sidebar-foreground/80 hover:text-white"
