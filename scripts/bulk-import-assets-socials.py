@@ -71,12 +71,21 @@ def import_assets(year, engine, sq_to_id):
                     with engine.connect() as conn:
                         batch_size = 5000
                         for i in range(0, len(data_to_insert), batch_size):
+                            # Usamos um sub-select para evitar duplicatas baseadas nos campos de negócio
+                            # Como a tabela não tem uma constraint UNIQUE composta, fazemos a checagem no INSERT
                             conn.execute(text("""
                                 INSERT INTO "CandidateAsset" (id, candidate_id, tipo_bem, descricao, valor)
-                                VALUES (:id, :candidate_id, :tipo, :desc, :valor)
+                                SELECT :id, :candidate_id, :tipo, :desc, :valor
+                                WHERE NOT EXISTS (
+                                    SELECT 1 FROM "CandidateAsset" 
+                                    WHERE candidate_id = :candidate_id 
+                                    AND tipo_bem = :tipo 
+                                    AND descricao = :desc 
+                                    AND valor = :valor
+                                )
                             """), data_to_insert[i:i+batch_size])
                         conn.commit()
-                        logger.info(f"  {len(data_to_insert)} bens inseridos de {csv_path.name}")
+                        logger.info(f"  Processamento de lotes concluído para {csv_path.name}")
         except Exception as e:
             logger.error(f"Erro ao processar bens de {csv_path.name}: {e}")
 

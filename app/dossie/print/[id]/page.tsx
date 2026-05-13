@@ -131,6 +131,24 @@ export default async function DossiePrintPage({
           </div>
         </div>
 
+        {/* Social Media */}
+        {candidate.socials && candidate.socials.length > 0 && (
+          <div className="space-y-4 mb-10 bg-zinc-50 p-6 rounded-xl border">
+            <h2 className="text-xl font-bold flex items-center gap-2 border-b pb-2 text-zinc-800">
+              <Share2 className="h-5 w-5 text-primary" />
+              Canais Digitais Oficiais
+            </h2>
+            <div className="flex flex-wrap gap-4 pt-2">
+              {candidate.socials.map((social) => (
+                <div key={social.id} className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border shadow-sm">
+                  <span className="text-sm font-bold text-zinc-800">{social.tipo_rede}:</span>
+                  <span className="text-sm text-primary font-medium">{social.url}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Electoral Performance */}
         <div className="space-y-4 mb-10">
           <h2 className="text-xl font-bold flex items-center gap-2 border-b pb-2 text-zinc-800">
