@@ -8,7 +8,7 @@ echo "==> Gerando Prisma client..."
 npx prisma generate
 
 echo "==> Build Next.js (no host, com acesso ao swap)..."
-NODE_OPTIONS="--max-old-space-size=2048" npm run build
+NODE_OPTIONS="--max-old-space-size=1024" NEXT_TELEMETRY_DISABLED=1 npm run build
 
 echo "==> Build da imagem Docker (sem compilacao)..."
 docker build -f Dockerfile.prebuilt -t iceberg-app:latest .
