@@ -54,6 +54,8 @@ model CandidateSocial {
   tipo_rede    String
   url          String
   candidate    Candidate @relation(fields: [candidate_id], references: [id])
+
+  @@unique([candidate_id, url])
 }
 
 model MyCandidate {
