@@ -15,7 +15,7 @@ services:
       - iceberg_db_data:/var/lib/postgresql/data
 
   app:
-    image: ghcr.io/gatepfr/iceberg-crm:latest
+    image: ghcr.io/gatepfr/raioxeleitoral:latest
     container_name: iceberg-app-prod
     restart: always
     ports:
