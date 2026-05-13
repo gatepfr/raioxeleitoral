@@ -11,6 +11,10 @@ def fix_name_spaces():
         print("DATABASE_URL not found")
         return
 
+    # Limpa o parâmetro ?schema= do DATABASE_URL para evitar erro no psycopg2
+    if "?schema=" in db_url:
+        db_url = db_url.split("?")[0]
+
     try:
         engine = create_engine(db_url)
         with engine.connect() as conn:
