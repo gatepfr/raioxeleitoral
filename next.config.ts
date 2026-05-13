@@ -11,10 +11,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Força o uso do Webpack em vez do Turbopack para estabilizar o build no Docker
-  webpack: (config) => {
-    return config;
-  },
+  turbopack: {},
 };
 
 export default nextConfig;
