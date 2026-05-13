@@ -34,12 +34,14 @@ export function CandidateTable({
 }: CandidateTableProps) {
   const getPhotoUrl = (cand: Candidate) => {
     let electionId = "2045202024"; // Default 2024
-    if (cand.ano_ultima_eleicao === 2022) electionId = "20220001";
+    if (cand.ano_ultima_eleicao === 2022) electionId = "2040602022";
     if (cand.ano_ultima_eleicao === 2020) electionId = "2030402020";
-    if (cand.ano_ultima_eleicao === 2018) electionId = "20180001";
+    if (cand.ano_ultima_eleicao === 2018) electionId = "2022802018";
     
     // Using the correct TSE architecture format
     // Format: .../img/{electionId}/{sq_candidato}/{ue_id}
+    // For 2022/2018, ue_id is the UF (ex: PR)
+    // For 2024/2020, ue_id is the city code (ex: 74250)
     return `https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/${electionId}/${cand.sq_candidato}/${cand.ue_id}`;
   };
 
