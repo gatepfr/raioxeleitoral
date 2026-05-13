@@ -38,7 +38,9 @@ export function CandidateTable({
     if (cand.ano_ultima_eleicao === 2020) electionId = "2030402020";
     if (cand.ano_ultima_eleicao === 2018) electionId = "20180001";
     
-    return `https://divulgacandcontas.tse.jus.br/divulga/rest/v1/candidatura/buscar/foto/${electionId}/${cand.sq_candidato}/${electionId}`;
+    // Using the correct TSE architecture format
+    // Format: .../img/{electionId}/{sq_candidato}/{ue_id}
+    return `https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/${electionId}/${cand.sq_candidato}/${cand.ue_id}`;
   };
 
   const renderSortIcon = (field: string) => {
