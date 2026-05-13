@@ -4,36 +4,36 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-# Gera o client do prisma para os alvos específicos
 RUN npx prisma generate
+
 ENV NEXT_TURBO=0
 ENV NEXT_PRIVATE_LOCAL_TURBO=0
 ENV GENERATE_SOURCEMAP=false
-
-# Limita a memória do Node e a paralelização do build para evitar SIGKILL (OOM)
-ENV NODE_OPTIONS="--max-old-space-size=2048"
 ENV NEXT_TELEMETRY_DISABLED=1
+# Reduzindo para 1GB para caber em servidores menores
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+
 RUN npm run build
 
 # Stage 2: Run
 FROM node:20-bullseye-slim AS runner
 WORKDIR /app
 
-# Garante que as bibliotecas SSL necessárias estejam presentes
 RUN apt-get update && apt-get install -y \
     openssl \
     ca-certificates \
-    libssl1.1 \
     && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
-COPY --from=builder /app/next.config.ts ./
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# No modo standalone, copiamos apenas o essencial
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/scripts ./scripts
 
 EXPOSE 3000
-CMD ["npm", "start"]
+
+# O modo standalone roda via server.js
+CMD ["node", "server.js"]
