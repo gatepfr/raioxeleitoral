@@ -11,8 +11,11 @@ interface FilterBarProps {
     municipio: string;
     partido: string;
     nomeUrna: string;
+    cargo: string;
     minPatrimonio: string;
     maxPatrimonio: string;
+    minDespesa: string;
+    maxDespesa: string;
   }) => void;
 }
 
@@ -23,8 +26,21 @@ export function FilterBar({ onSearch }: FilterBarProps) {
   const [municipio, setMunicipio] = useState("");
   const [partido, setPartido] = useState("");
   const [nomeUrna, setNomeUrna] = useState("");
+  const [cargo, setCargo] = useState("");
   const [minPatrimonio, setMinPatrimonio] = useState("");
   const [maxPatrimonio, setMaxPatrimonio] = useState("");
+  const [minDespesa, setMinDespesa] = useState("");
+  const [maxDespesa, setMaxDespesa] = useState("");
+
+  const CARGOS = [
+    "VEREADOR",
+    "PREFEITO",
+    "DEPUTADO ESTADUAL",
+    "DEPUTADO FEDERAL",
+    "SENADOR",
+    "GOVERNADOR",
+    "PRESIDENTE"
+  ];
 
   useEffect(() => {
     fetch("/api/locations?type=states")
@@ -55,8 +71,11 @@ export function FilterBar({ onSearch }: FilterBarProps) {
       municipio: municipio.trim(),
       partido: partido.trim(),
       nomeUrna: nomeUrna.trim(),
+      cargo,
       minPatrimonio,
-      maxPatrimonio
+      maxPatrimonio,
+      minDespesa,
+      maxDespesa
     });
   };
 
@@ -97,8 +116,8 @@ export function FilterBar({ onSearch }: FilterBarProps) {
           </div>
         </div>
 
-        {/* Linha 2: Identificação */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Linha 2: Identificação e Cargo */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nome na Urna</label>
             <Input
@@ -115,26 +134,57 @@ export function FilterBar({ onSearch }: FilterBarProps) {
               onChange={(e) => setPartido(e.target.value.toUpperCase())}
             />
           </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cargo</label>
+            <select 
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              value={cargo}
+              onChange={(e) => setCargo(e.target.value)}
+            >
+              <option value="">Todos os Cargos</option>
+              {CARGOS.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Linha 3: Financeiro */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Linha 3: Financeiro (Bens e Gastos) */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Min. Bens Declarados</label>
+            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Min. Bens</label>
             <Input
               type="number"
-              placeholder="Min R$"
+              placeholder="R$ 0"
               value={minPatrimonio}
               onChange={(e) => setMinPatrimonio(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Max. Bens Declarados</label>
+            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Max. Bens</label>
             <Input
               type="number"
-              placeholder="Max R$"
+              placeholder="R$ +"
               value={maxPatrimonio}
               onChange={(e) => setMaxPatrimonio(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Min. Gasto</label>
+            <Input
+              type="number"
+              placeholder="R$ 0"
+              value={minDespesa}
+              onChange={(e) => setMinDespesa(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Max. Gasto</label>
+            <Input
+              type="number"
+              placeholder="R$ +"
+              value={maxDespesa}
+              onChange={(e) => setMaxDespesa(e.target.value)}
             />
           </div>
         </div>

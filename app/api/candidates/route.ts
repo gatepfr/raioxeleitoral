@@ -9,11 +9,16 @@ export async function GET(request: Request) {
     const cargo = searchParams.get("cargo")
     const partido = searchParams.get("partido")
     const nomeUrna = searchParams.get("nomeUrna")
+    
     const minPatrimonioStr = searchParams.get("minPatrimonio")
     const maxPatrimonioStr = searchParams.get("maxPatrimonio")
+    const minDespesaStr = searchParams.get("minDespesa")
+    const maxDespesaStr = searchParams.get("maxDespesa")
 
     const minPatrimonio = minPatrimonioStr ? parseFloat(minPatrimonioStr) : null
     const maxPatrimonio = maxPatrimonioStr ? parseFloat(maxPatrimonioStr) : null
+    const minDespesa = minDespesaStr ? parseFloat(minDespesaStr) : null
+    const maxDespesa = maxDespesaStr ? parseFloat(maxDespesaStr) : null
 
     const page = parseInt(searchParams.get("page") || "1")
     const limit = 50
@@ -28,13 +33,19 @@ export async function GET(request: Request) {
     const where: any = {
       ...(uf && { uf: { equals: uf, mode: 'insensitive' } }),
       ...(municipio && { municipio: { equals: municipio, mode: 'insensitive' } }),
-      ...(cargo && { cargo: { contains: cargo, mode: 'insensitive' } }),
+      ...(cargo && { cargo: { equals: cargo, mode: 'insensitive' } }),
       ...(partido && { partido: { equals: partido, mode: 'insensitive' } }),
       ...(nomeUrna && { nome_urna: { contains: nomeUrna, mode: 'insensitive' } }),
       ...((minPatrimonio !== null || maxPatrimonio !== null) && {
         patrimonio_total: {
           ...(minPatrimonio !== null && { gte: minPatrimonio }),
           ...(maxPatrimonio !== null && { lte: maxPatrimonio }),
+        }
+      }),
+      ...((minDespesa !== null || maxDespesa !== null) && {
+        total_despesas: {
+          ...(minDespesa !== null && { gte: minDespesa }),
+          ...(maxDespesa !== null && { lte: maxDespesa }),
         }
       }),
     }
