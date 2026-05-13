@@ -44,10 +44,12 @@ def import_candidates_only_new(year, engine):
         available_cols = [col for col in mapping.keys() if col in df.columns]
         df_filtered = df[available_cols].rename(columns={col: mapping[col] for col in available_cols})
         
-        # Garante colunas mínimas
+        # Garante colunas mínimas e remove espaços (trim)
         for target_col in mapping.values():
             if target_col not in df_filtered.columns:
                 df_filtered[target_col] = None
+            elif df_filtered[target_col].dtype == object:
+                df_filtered[target_col] = df_filtered[target_col].str.strip()
 
         df_filtered['titulo_eleitor'] = df_filtered['titulo_eleitor'].astype(str).str.zfill(12)
         df_filtered['sq_candidato'] = df_filtered['sq_candidato'].astype(str)
