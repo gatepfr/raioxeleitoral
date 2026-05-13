@@ -1,6 +1,6 @@
 "use client"
 
-import { Candidate } from "@/types"
+import { Candidate, VoteByCity } from "@/types"
 import {
   Dialog,
   DialogContent,
@@ -16,10 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { User, Wallet, Share2, ExternalLink, FileText } from "lucide-react"
+import { 
+  User, Wallet, Share2, ExternalLink, FileText, Globe, 
+  Loader2, ChevronDown, ChevronUp 
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
+import { useState } from "react"
 
 interface CandidateDossierProps {
   candidate: Candidate | null
@@ -34,7 +38,30 @@ export function CandidateDossier({
   onOpenChange,
   onCaptureLead,
 }: CandidateDossierProps) {
+  const [allVotes, setAllVotes] = useState<VoteByCity[]>([])
+  const [isLoadingVotes, setIsLoadingVotes] = useState(false)
+  const [showAllVotes, setShowAllVotes] = useState(false)
+
   if (!candidate) return null
+
+  const fetchAllVotes = async () => {
+    if (allVotes.length > 0) {
+      setShowAllVotes(!showAllVotes)
+      return
+    }
+
+    setIsLoadingVotes(true)
+    try {
+      const response = await fetch(`/api/candidates/${candidate.id}/votes`)
+      const data = await response.json()
+      setAllVotes(data)
+      setShowAllVotes(true)
+    } catch (error) {
+      console.error("Error fetching all votes:", error)
+    } finally {
+      setIsLoadingVotes(false)
+    }
+  }
 
   const getPhotoUrl = (cand: Candidate) => {
     let electionId = "2045202024"; // Default 2024
@@ -42,10 +69,6 @@ export function CandidateDossier({
     if (cand.ano_ultima_eleicao === 2020) electionId = "2030402020";
     if (cand.ano_ultima_eleicao === 2018) electionId = "2022802018";
     
-    // Using the correct TSE architecture format
-    // Format: .../img/{electionId}/{sq_candidato}/{ue_id}
-    // For 2022/2018, ue_id is the UF (ex: PR)
-    // For 2024/2020, ue_id is the city code (ex: 74250)
     return `https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/${electionId}/${cand.sq_candidato}/${cand.ue_id}`;
   };
 
@@ -59,7 +82,12 @@ export function CandidateDossier({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      onOpenChange(open)
+      if (!open) {
+        setShowAllVotes(false)
+      }
+    }}>
       <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-y-auto overflow-x-hidden p-0 gap-0 border-none">
         {/* Header Black Section */}
         <div className="bg-zinc-950 text-white p-6 sm:p-10">
@@ -118,7 +146,7 @@ export function CandidateDossier({
         {/* Content White Section */}
         <div className="p-6 sm:p-10 space-y-12 bg-background">
           
-          {/* Social Media - High Priority now */}
+          {/* Social Media */}
           {candidate.socials && candidate.socials.length > 0 && (
             <div className="space-y-4 bg-zinc-50 dark:bg-zinc-900/20 p-6 rounded-2xl border">
               <div className="flex items-center gap-2">
@@ -219,41 +247,89 @@ export function CandidateDossier({
             </div>
           </div>
 
-          {/* Geographical Performance (New!) */}
+          {/* Geographical Performance */}
           {candidate.votesByCity && candidate.votesByCity.length > 0 && (
             <div className="space-y-6">
-              <div className="flex items-center gap-2 border-b pb-4">
-                <Globe className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-bold tracking-tight">Distribuição de Votos por Cidade</h3>
+              <div className="flex items-center justify-between border-b pb-4">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-primary" />
+                  <h3 className="text-xl font-bold tracking-tight">Distribuição de Votos por Cidade</h3>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary font-bold hover:bg-primary/5"
+                  onClick={fetchAllVotes}
+                  disabled={isLoadingVotes}
+                >
+                  {isLoadingVotes ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : showAllVotes ? (
+                    <ChevronUp className="h-4 w-4 mr-2" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 mr-2" />
+                  )}
+                  {showAllVotes ? "Ver menos" : "Ver todas as cidades"}
+                </Button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="border rounded-2xl overflow-hidden shadow-sm">
-                  <Table>
-                    <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50">
-                      <TableRow>
-                        <TableHead className="font-black uppercase text-[10px] tracking-widest">Cidade (Top 10)</TableHead>
-                        <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Votos</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {candidate.votesByCity.map((vote) => (
-                        <TableRow key={vote.id} className="hover:bg-zinc-50/50">
-                          <TableCell className="font-bold text-xs">{vote.municipio}</TableCell>
-                          <TableCell className="text-right font-bold text-xs text-primary">
-                            {vote.votos.toLocaleString()}
-                          </TableCell>
+              
+              {!showAllVotes ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="border rounded-2xl overflow-hidden shadow-sm">
+                    <Table>
+                      <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50">
+                        <TableRow>
+                          <TableHead className="font-black uppercase text-[10px] tracking-widest">Cidade (Top 10)</TableHead>
+                          <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Votos</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {candidate.votesByCity.map((vote) => (
+                          <TableRow key={vote.id} className="hover:bg-zinc-50/50">
+                            <TableCell className="font-bold text-xs">{vote.municipio}</TableCell>
+                            <TableCell className="text-right font-bold text-xs text-primary">
+                              {vote.votos.toLocaleString()}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="bg-zinc-50 dark:bg-zinc-900/20 p-6 rounded-2xl border flex flex-col justify-center text-center space-y-2">
+                     <p className="text-sm text-zinc-500 font-medium">Força Regional</p>
+                     <p className="text-xs text-zinc-400">
+                       O candidato demonstrou maior concentração de votos em <strong>{candidate.votesByCity[0].municipio}</strong>, onde obteve {((candidate.votesByCity[0].votos / candidate.total_votos) * 100).toFixed(1)}% do seu total de votos.
+                     </p>
+                  </div>
                 </div>
-                <div className="bg-zinc-50 dark:bg-zinc-900/20 p-6 rounded-2xl border flex flex-col justify-center text-center space-y-2">
-                   <p className="text-sm text-zinc-500 font-medium">Força Regional</p>
-                   <p className="text-xs text-zinc-400">
-                     O candidato demonstrou maior concentração de votos em <strong>{candidate.votesByCity[0].municipio}</strong>, onde obteve {((candidate.votesByCity[0].votos / candidate.total_votos) * 100).toFixed(1)}% do seu total de votos.
-                   </p>
+              ) : (
+                <div className="border rounded-2xl overflow-hidden shadow-sm animate-in fade-in duration-300">
+                  <div className="max-h-[400px] overflow-y-auto">
+                    <Table>
+                      <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50 sticky top-0 z-10">
+                        <TableRow>
+                          <TableHead className="font-black uppercase text-[10px] tracking-widest">Cidade</TableHead>
+                          <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Votos</TableHead>
+                          <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">% do Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {allVotes.map((vote) => (
+                          <TableRow key={vote.id} className="hover:bg-zinc-50/50">
+                            <TableCell className="font-bold text-xs">{vote.municipio}</TableCell>
+                            <TableCell className="text-right font-bold text-xs text-primary">
+                              {vote.votos.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-right font-medium text-xs text-zinc-400">
+                              {((vote.votos / candidate.total_votos) * 100).toFixed(2)}%
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
