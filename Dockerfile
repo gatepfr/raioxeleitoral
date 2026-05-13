@@ -9,6 +9,10 @@ RUN npx prisma generate
 ENV NEXT_TURBO=0
 ENV NEXT_PRIVATE_LOCAL_TURBO=0
 ENV GENERATE_SOURCEMAP=false
+
+# Limita a memória do Node e a paralelização do build para evitar SIGKILL (OOM)
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Stage 2: Run
