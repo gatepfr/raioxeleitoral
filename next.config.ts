@@ -11,10 +11,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Força o uso do Webpack desativando o Turbopack
-  webpack: (config) => {
-    return config;
-  },
 };
 
 export default nextConfig;
