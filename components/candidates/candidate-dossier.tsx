@@ -72,7 +72,8 @@ export function CandidateDossier({
     return `https://divulgacandcontas.tse.jus.br/divulga/rest/arquivo/img/${electionId}/${cand.sq_candidato}/${cand.ue_id}`;
   };
 
-  const totalAssets = candidate.assets?.reduce((acc, asset) => acc + asset.valor, 0) ?? 0
+  const sumAssets = candidate.assets?.reduce((acc, asset) => acc + asset.valor, 0) ?? 0
+  const totalAssets = sumAssets > 0 ? sumAssets : (candidate.patrimonio_total ?? 0)
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -225,7 +226,11 @@ export function CandidateDossier({
               </div>
             ) : (
               <div className="text-center py-10 bg-muted/20 rounded-2xl border-2 border-dashed">
-                <p className="text-sm text-muted-foreground font-medium">Nenhum bem declarado nesta eleição.</p>
+                <p className="text-sm text-muted-foreground font-medium">
+                  {candidate.patrimonio_total > 0
+                    ? "Detalhamento dos bens não disponível."
+                    : "Nenhum bem declarado nesta eleição."}
+                </p>
               </div>
             )}
           </div>
