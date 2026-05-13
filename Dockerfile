@@ -7,7 +7,7 @@ COPY . .
 # Gera o client do prisma para os alvos específicos
 RUN npx prisma generate
 ENV GENERATE_SOURCEMAP=false
-RUN NODE_OPTIONS="--max-old-space-size=3072" npm run build
+RUN NODE_OPTIONS="--max-old-space-size=1536" npm run build
 
 # Stage 2: Run
 FROM node:20-bullseye-slim AS runner
