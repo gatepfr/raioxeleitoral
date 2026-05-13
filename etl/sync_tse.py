@@ -167,8 +167,8 @@ def process_year(year, engine):
             
             if not df_active_assets.empty:
                 candidate_ids = list(sq_to_id.values())
-                conn.execute(text('DELETE FROM "CandidateAsset" WHERE candidate_id IN :ids'), {"ids": tuple(candidate_ids)})
-                
+                conn.execute(text('DELETE FROM "CandidateAsset" WHERE candidate_id = ANY(:ids)'), {"ids": candidate_ids})
+
                 totals = {}
                 for _, row in df_active_assets.iterrows():
                     cid = sq_to_id[row['sq_candidato']]
@@ -178,15 +178,15 @@ def process_year(year, engine):
                     except (ValueError, TypeError):
                         valor = 0.0
                     totals[cid] = totals.get(cid, 0) + valor
-                    
+
                     conn.execute(text("""
                         INSERT INTO "CandidateAsset" (id, candidate_id, tipo_bem, descricao, valor)
                         VALUES (:id, :candidate_id, :tipo, :desc, :valor)
                     """), {
                         "id": str(uuid.uuid4()),
                         "candidate_id": cid,
-                        "tipo": row['DS_TIPO_BEM_CANDIDATO'],
-                        "desc": row['DS_BEM_CANDIDATO'],
+                        "tipo": str(row['DS_TIPO_BEM_CANDIDATO']).strip(),
+                        "desc": str(row['DS_BEM_CANDIDATO']).strip(),
                         "valor": valor
                     })
                 
