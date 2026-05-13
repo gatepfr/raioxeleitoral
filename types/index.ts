@@ -11,6 +11,12 @@ export interface Social {
   url: string;
 }
 
+export interface VoteByCity {
+  id: string;
+  municipio: string;
+  votos: number;
+}
+
 export interface Candidate {
   id: string;
   sq_candidato: string;
@@ -30,6 +36,7 @@ export interface Candidate {
   total_despesas: number;
   assets: Asset[];
   socials: Social[];
+  votesByCity?: VoteByCity[];
   lead?: Lead | null;
 }
 

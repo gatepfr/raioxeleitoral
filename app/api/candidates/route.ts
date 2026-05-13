@@ -44,10 +44,14 @@ export async function GET(request: Request) {
         where,
         take: limit,
         skip,
-        orderBy: { [sortBy]: sortOrder },
+        orderBy: { [dbSortBy]: sortOrder },
         include: {
           assets: true,
-          socials: true
+          socials: true,
+          votesByCity: {
+            orderBy: { votos: 'desc' },
+            take: 10
+          }
         }
       }),
       db.candidate.count({ where })

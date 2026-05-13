@@ -28,6 +28,7 @@ model Candidate {
   total_despesas       Float             @default(0)
   assets               CandidateAsset[]
   socials              CandidateSocial[]
+  votesByCity          CandidateVote[]
 }
 
 model User {
@@ -56,6 +57,16 @@ model CandidateSocial {
   candidate    Candidate @relation(fields: [candidate_id], references: [id])
 
   @@unique([candidate_id, url])
+}
+
+model CandidateVote {
+  id           String    @id @default(uuid())
+  candidate_id String
+  municipio    String
+  votos        Int
+  candidate    Candidate @relation(fields: [candidate_id], references: [id])
+
+  @@index([candidate_id])
 }
 
 model MyCandidate {

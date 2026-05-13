@@ -219,6 +219,44 @@ export function CandidateDossier({
             </div>
           </div>
 
+          {/* Geographical Performance (New!) */}
+          {candidate.votesByCity && candidate.votesByCity.length > 0 && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 border-b pb-4">
+                <Globe className="h-5 w-5 text-primary" />
+                <h3 className="text-xl font-bold tracking-tight">Distribuição de Votos por Cidade</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="border rounded-2xl overflow-hidden shadow-sm">
+                  <Table>
+                    <TableHeader className="bg-zinc-50 dark:bg-zinc-900/50">
+                      <TableRow>
+                        <TableHead className="font-black uppercase text-[10px] tracking-widest">Cidade (Top 10)</TableHead>
+                        <TableHead className="text-right font-black uppercase text-[10px] tracking-widest">Votos</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {candidate.votesByCity.map((vote) => (
+                        <TableRow key={vote.id} className="hover:bg-zinc-50/50">
+                          <TableCell className="font-bold text-xs">{vote.municipio}</TableCell>
+                          <TableCell className="text-right font-bold text-xs text-primary">
+                            {vote.votos.toLocaleString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="bg-zinc-50 dark:bg-zinc-900/20 p-6 rounded-2xl border flex flex-col justify-center text-center space-y-2">
+                   <p className="text-sm text-zinc-500 font-medium">Força Regional</p>
+                   <p className="text-xs text-zinc-400">
+                     O candidato demonstrou maior concentração de votos em <strong>{candidate.votesByCity[0].municipio}</strong>, onde obteve {((candidate.votesByCity[0].votos / candidate.total_votos) * 100).toFixed(1)}% do seu total de votos.
+                   </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex flex-wrap justify-end gap-4 pt-8 border-t">
             <Button variant="outline" size="lg" className="px-8 rounded-xl font-bold" onClick={() => onOpenChange(false)}>
