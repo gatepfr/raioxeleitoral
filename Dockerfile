@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:20-slim AS builder
+FROM node:20-bullseye-slim AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
@@ -9,13 +9,12 @@ ENV GENERATE_SOURCEMAP=false
 RUN NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
 # Stage 2: Run
-FROM node:20-slim AS runner
+FROM node:20-bullseye-slim AS runner
 WORKDIR /app
 
-# Instala dependências do sistema necessárias para o Prisma e SSL
+# Instala dependências essenciais
 RUN apt-get update && apt-get install -y \
     openssl \
-    libssl-dev \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
