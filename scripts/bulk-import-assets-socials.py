@@ -104,6 +104,9 @@ def import_socials(year, engine, sq_to_id):
             url_col = 'DS_URL' if 'DS_URL' in df.columns else 'NM_URL_REDE_SOCIAL'
             type_col = 'DS_TIPO_REDE_SOCIAL' if 'DS_TIPO_REDE_SOCIAL' in df.columns else None
 
+            # Remove duplicatas exatas no próprio arquivo para evitar falha no batch
+            df = df.drop_duplicates(subset=['sq_candidato', url_col])
+
             df_active = df[df['sq_candidato'].isin(sq_to_id.keys())].copy()
             
             if not df_active.empty:
