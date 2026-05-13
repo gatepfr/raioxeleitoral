@@ -1,12 +1,14 @@
 import { db } from "@/lib/db"
-import { NextResponse } from "next/server"
+import { NextResponse, NextRequest } from "next/server"
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const candidateId = params.id
+    // In Next.js 15+, params is a Promise
+    const resolvedParams = await params
+    const candidateId = resolvedParams.id
 
     const votes = await db.candidateVote.findMany({
       where: {
