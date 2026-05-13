@@ -105,7 +105,8 @@ def process_year(year, engine):
         'SG_UF': 'uf',
         'NM_UE': 'municipio',
         'SG_UE': 'ue_id',
-        'DS_SITUACAO_CANDIDATURA': 'situacao_candidatura'
+        'DS_SITUACAO_CANDIDATURA': 'situacao_candidatura',
+        'DS_SIT_TOT_TURNO': 'situacao_totalizacao'
     }
 
     for csv_path in cand_files:
@@ -119,7 +120,7 @@ def process_year(year, engine):
             if target_col not in df_filtered.columns:
                 df_filtered[target_col] = None
 
-        string_cols = ['nome_completo', 'nome_urna', 'partido', 'cargo', 'uf', 'municipio', 'ue_id']
+        string_cols = ['nome_completo', 'nome_urna', 'partido', 'cargo', 'uf', 'municipio', 'ue_id', 'situacao_totalizacao']
         for col in string_cols:
             if col in df_filtered.columns:
                 df_filtered[col] = df_filtered[col].astype(str).str.strip()
@@ -133,8 +134,8 @@ def process_year(year, engine):
         with engine.connect() as conn:
             for _, row in df_filtered.iterrows():
                 conn.execute(text("""
-                    INSERT INTO "Candidate" (id, sq_candidato, nome_completo, nome_urna, cpf, titulo_eleitor, email_tse, partido, cargo, uf, municipio, ue_id, situacao_candidatura, ano_ultima_eleicao, "updatedAt")
-                    VALUES (:id, :sq_candidato, :nome_completo, :nome_urna, :cpf, :titulo_eleitor, :email_tse, :partido, :cargo, :uf, :municipio, :ue_id, :situacao_candidatura, :ano_ultima_eleicao, :updatedAt)
+                    INSERT INTO "Candidate" (id, sq_candidato, nome_completo, nome_urna, cpf, titulo_eleitor, email_tse, partido, cargo, uf, municipio, ue_id, situacao_candidatura, situacao_totalizacao, ano_ultima_eleicao, "updatedAt")
+                    VALUES (:id, :sq_candidato, :nome_completo, :nome_urna, :cpf, :titulo_eleitor, :email_tse, :partido, :cargo, :uf, :municipio, :ue_id, :situacao_candidatura, :situacao_totalizacao, :ano_ultima_eleicao, :updatedAt)
                     ON CONFLICT (titulo_eleitor) DO UPDATE SET
                         sq_candidato = EXCLUDED.sq_candidato,
                         nome_completo = EXCLUDED.nome_completo,
@@ -147,6 +148,7 @@ def process_year(year, engine):
                         municipio = EXCLUDED.municipio,
                         ue_id = EXCLUDED.ue_id,
                         situacao_candidatura = EXCLUDED.situacao_candidatura,
+                        situacao_totalizacao = EXCLUDED.situacao_totalizacao,
                         ano_ultima_eleicao = EXCLUDED.ano_ultima_eleicao,
                         "updatedAt" = EXCLUDED."updatedAt"
                     WHERE "Candidate".ano_ultima_eleicao <= EXCLUDED.ano_ultima_eleicao

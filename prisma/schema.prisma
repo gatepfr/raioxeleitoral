@@ -22,6 +22,7 @@ model Candidate {
   municipio            String
   ue_id                String?
   situacao_candidatura String
+  situacao_totalizacao String?
   updatedAt            DateTime          @updatedAt
   ano_ultima_eleicao   Int               @default(2024)
   patrimonio_total     Float             @default(0)

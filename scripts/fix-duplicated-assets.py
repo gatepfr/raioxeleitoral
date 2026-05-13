@@ -33,18 +33,33 @@ def fix_duplicate_assets():
             print(f"Encontrados {len(duplicates)} grupos de duplicatas.")
 
             if len(duplicates) > 0:
-                delete_query = text('''
-                    DELETE FROM "CandidateAsset" a
-                    WHERE a.id NOT IN (
-                        SELECT MIN(id)
-                        FROM "CandidateAsset"
-                        GROUP BY candidate_id, tipo_bem, descricao, valor
-                    )
-                ''')
+                print("Iniciando limpeza rápida via tabela temporária...")
+                # 0. Limpar tabela temporária anterior se existir
+                conn.execute(text('DROP TABLE IF EXISTS "CandidateAsset_temp"'))
                 
-                result = conn.execute(delete_query)
+                # 1. Criar tabela temporária com dados únicos
+                create_temp = text('''
+                    CREATE TABLE "CandidateAsset_temp" AS
+                    SELECT DISTINCT ON (candidate_id, tipo_bem, descricao, valor)
+                        id, candidate_id, tipo_bem, descricao, valor
+                    FROM "CandidateAsset"
+                    ORDER BY candidate_id, tipo_bem, descricao, valor, id ASC
+                ''')
+                conn.execute(create_temp)
+                print("Tabela temporária criada.")
+
+                # 2. Truncar a tabela original
+                conn.execute(text('TRUNCATE TABLE "CandidateAsset"'))
+                print("Tabela original truncada.")
+
+                # 3. Inserir dados limpos de volta
+                conn.execute(text('INSERT INTO "CandidateAsset" (id, candidate_id, tipo_bem, descricao, valor) SELECT id, candidate_id, tipo_bem, descricao, valor FROM "CandidateAsset_temp"'))
+                print("Dados limpos restaurados.")
+
+                # 4. Remover tabela temporária
+                conn.execute(text('DROP TABLE "CandidateAsset_temp"'))
                 conn.commit()
-                print(f"Sucesso! Removidos {result.rowcount} registros duplicados.")
+                print("Tabela temporária removida e alterações confirmadas.")
                 
                 # 2. Recalcular patrimônio total na tabela Candidate para 2024
                 print("Recalculando patrimônio_total dos candidatos de 2024...")

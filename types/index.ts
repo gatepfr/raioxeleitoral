@@ -30,6 +30,7 @@ export interface Candidate {
   uf: string;
   municipio: string;
   situacao_candidatura: string;
+  situacao_totalizacao: string | null;
   ano_ultima_eleicao: number;
   patrimonio_total: number;
   total_votos: number;
