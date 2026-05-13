@@ -104,10 +104,23 @@ export function CandidateDossier({
                 Eleição de {candidate.ano_ultima_eleicao} — {candidate.cargo}
               </p>
             </div>
-            <div className="text-right hidden sm:block">
+            <div className="text-right hidden sm:block space-y-2">
                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground uppercase tracking-tighter">
                  {candidate.partido}
                </span>
+               {candidate.situacao_totalizacao && (
+                 <div>
+                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
+                     candidate.situacao_totalizacao.startsWith('ELEITO')
+                       ? 'bg-green-500 text-white border-green-600'
+                       : candidate.situacao_totalizacao === 'SUPLENTE'
+                       ? 'bg-yellow-400 text-yellow-900 border-yellow-500'
+                       : 'bg-red-500 text-white border-red-600'
+                   }`}>
+                     {candidate.situacao_totalizacao.startsWith('ELEITO') ? '✓' : candidate.situacao_totalizacao === 'SUPLENTE' ? '◎' : '✗'} {candidate.situacao_totalizacao}
+                   </span>
+                 </div>
+               )}
             </div>
           </div>
 

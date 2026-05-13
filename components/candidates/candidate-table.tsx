@@ -114,6 +114,17 @@ export function CandidateTable({
                         {candidate.partido}
                       </div>
                       <div className="mt-1 flex flex-wrap gap-2">
+                        {candidate.situacao_totalizacao && (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            candidate.situacao_totalizacao.startsWith('ELEITO')
+                              ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
+                              : candidate.situacao_totalizacao === 'SUPLENTE'
+                              ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
+                              : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800'
+                          }`}>
+                            {candidate.situacao_totalizacao.startsWith('ELEITO') ? '✓' : candidate.situacao_totalizacao === 'SUPLENTE' ? '◎' : '✗'} {candidate.situacao_totalizacao}
+                          </span>
+                        )}
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
                           Bens: {new Intl.NumberFormat("pt-BR", {
                             style: "currency",
