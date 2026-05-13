@@ -6,6 +6,8 @@ RUN npm install
 COPY . .
 # Gera o client do prisma para os alvos específicos
 RUN npx prisma generate
+ENV NEXT_TURBO=0
+ENV NEXT_PRIVATE_LOCAL_TURBO=0
 ENV GENERATE_SOURCEMAP=false
 RUN npm run build
 
