@@ -15,9 +15,7 @@ services:
       - iceberg_db_data:/var/lib/postgresql/data
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: iceberg-app:latest
     container_name: iceberg-app-prod
     restart: always
     ports:
