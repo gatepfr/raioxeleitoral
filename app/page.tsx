@@ -21,8 +21,11 @@ export default function Home() {
     municipio: "", 
     partido: "", 
     nomeUrna: "",
+    cargo: "",
     minPatrimonio: "", 
     maxPatrimonio: "",
+    minDespesa: "",
+    maxDespesa: "",
     sortBy: "nome_urna",
     sortOrder: "asc",
     page: 1
@@ -37,8 +40,11 @@ export default function Home() {
       if (filters.municipio) params.append("municipio", filters.municipio);
       if (filters.partido) params.append("partido", filters.partido);
       if (filters.nomeUrna) params.append("nomeUrna", filters.nomeUrna);
+      if (filters.cargo) params.append("cargo", filters.cargo);
       if (filters.minPatrimonio) params.append("minPatrimonio", filters.minPatrimonio);
       if (filters.maxPatrimonio) params.append("maxPatrimonio", filters.maxPatrimonio);
+      if (filters.minDespesa) params.append("minDespesa", filters.minDespesa);
+      if (filters.maxDespesa) params.append("maxDespesa", filters.maxDespesa);
       params.append("sortBy", filters.sortBy);
       params.append("sortOrder", filters.sortOrder);
       params.append("page", filters.page.toString());
