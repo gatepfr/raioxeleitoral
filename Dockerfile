@@ -1,14 +1,14 @@
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
 RUN npx prisma generate
-RUN npm run build
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
 
 # Stage 2: Run
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/next.config.ts ./
